@@ -1,15 +1,35 @@
-//'use strict';
+'use strict';
 
 import utils from './common/Utils.js' ;
 
 
 // Global variables that are set and used
 // across the application
-let gl,
-    program,
-    squareVertexBuffer,
-    squareIndexBuffer,
-    indices;
+
+/**
+ * @type {HTMLCanvasElement}
+ */
+let canvas ;
+/**
+ * @type {WebGL2RenderingContext}
+ */
+let gl ;
+/**
+ * @type {WebGLProgram}
+ */
+let program ;
+/**
+ * @type {WebGLBuffer}
+ */
+let squareVertexBuffer ;
+/**
+ * @type {WebGLBuffer}
+ */
+let squareIndexBuffer ;
+/**
+ * @type {Array<number>}
+ */
+let indices;
 
 // Given an id, extract the content's of a shader script
 // from the DOM and return the compiled shader
@@ -130,11 +150,11 @@ function draw() {
 // Entry point to our application
 function init() {
     // Retrieve the canvas
-    const canvas = utils.getCanvas('webgl-canvas');
+    canvas = utils.getCanvas('webgl-canvas');
 
     // Set the canvas to the size of the screen
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.85 ;
+    canvas.height = window.innerHeight * 0.9 ;
 
     // Retrieve a WebGL context
     gl = utils.getGLContext(canvas);

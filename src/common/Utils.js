@@ -15,6 +15,11 @@ const utils = {
     },
   
     // Given a canvas element, return the WebGL2 context
+    /**
+     * 캔버스로 부터 GL 얻기
+     * @param {HTMLCanvasElement} canvas 
+     * @returns {WebGL2RenderingContext}
+     */
     getGLContext(canvas) {
         return canvas.getContext('webgl2') || console.error('WebGL2 is not available in your browser.');
     },
