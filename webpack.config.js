@@ -7,7 +7,8 @@ module.exports = {
 
     entry: {
         ch01_00_hello: './src/ch01_00_hello.js',
-        ch02_00_hello: './src/ch02_00_hello.js'
+        ch02_00_hello: './src/ch02_00_hello.js',
+        ch04_00_model_view_translation: './src/ch04_00_model_view_translation.js',
     },
 
     output: {
