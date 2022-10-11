@@ -1,5 +1,7 @@
 'use strict';
 
+import { vec3, vec4, mat4 } from 'gl-matrix';
+
 // Abstraction over constructing and interacting with a 3D scene using a camera
 class Camera {
 
@@ -12,6 +14,9 @@ class Camera {
         this.right = vec3.create();
         this.normal = vec3.create();
 
+        /**
+         * @type {mat4} 뷰행렬
+         */
         this.matrix = mat4.create();
 
         // You could have these options be passed in via the constructor
@@ -77,13 +82,15 @@ class Camera {
     }
 
     // Change camera position
-    setPosition( position ) {
+    setPosition( position ) 
+    {
         vec3.copy( this.position, position );
         this.update();
     }
 
     // Change camera focus
-    setFocus( focus ) {
+    setFocus( focus ) 
+    {
         vec3.copy( this.focus, focus );
         this.update();
     }
@@ -121,7 +128,11 @@ class Camera {
     }
 
     // Update the camera orientation
-    calculateOrientation() {
+    /**
+     * update right, up, normal(look)
+     */
+    calculateOrientation() 
+    {
         const right = vec4.create();
         vec4.set( right, 1, 0, 0, 0 );
         vec4.transformMat4( right, right, this.matrix );
@@ -139,14 +150,18 @@ class Camera {
     }
 
     // Update camera values
-    update() {
+    update() 
+    {
         mat4.identity( this.matrix );
 
-        if ( this.isTracking() ) {
+        if ( this.isTracking() ) 
+        {
             mat4.translate( this.matrix, this.matrix, this.position );
             mat4.rotateY( this.matrix, this.matrix, this.azimuth * Math.PI / 180 );
             mat4.rotateX( this.matrix, this.matrix, this.elevation * Math.PI / 180 );
-        } else {
+        } 
+        else 
+        {
             mat4.rotateY( this.matrix, this.matrix, this.azimuth * Math.PI / 180 );
             mat4.rotateX( this.matrix, this.matrix, this.elevation * Math.PI / 180 );
             mat4.translate( this.matrix, this.matrix, this.position );
@@ -155,7 +170,8 @@ class Camera {
         // We only update the position if we have a tracking camera.
         // For an orbiting camera we do not update the position. If
         // Why do you think we do not update the position?
-        if ( this.isTracking() ) {
+        if ( this.isTracking() ) 
+        {
             const position = vec4.create();
             vec4.set( position, 0, 0, 0, 1 );
             vec4.transformMat4( position, position, this.matrix );

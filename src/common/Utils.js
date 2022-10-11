@@ -4,8 +4,13 @@ import * as dat from 'dat.gui';
 
 const utils = {
 
-    // Find and return a DOM element given an ID
-    getCanvas(id) {
+    /**
+     * Find and return a DOM element given an ID
+     * @param {String} id DOM Element ID
+     * @returns {HTMLCanvasElement|NULL}
+     */
+    getCanvas(id) 
+    {
         const canvas = document.getElementById(id);
   
         if (!canvas) {
@@ -22,13 +27,19 @@ const utils = {
      * @param {HTMLCanvasElement} canvas 
      * @returns {WebGL2RenderingContext}
      */
-    getGLContext(canvas) {
+    getGLContext( canvas )
+    {
         return canvas.getContext('webgl2') || console.error('WebGL2 is not available in your browser.');
     },
   
     // Given a canvas element, expand it to the size of the window
     // and ensure that it automatically resizes as the window changes
-    autoResizeCanvas(canvas) {
+    /**
+     * 
+     * @param {HTMLCanvasElement} canvas 
+     */
+    autoResizeCanvas( canvas )
+    {
         const expandFullScreen = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -40,6 +51,12 @@ const utils = {
   
     // Given a WebGL context and an id for a shader script,
     // return a compiled shader
+    /**
+     * 
+     * @param {WebGL2RenderingContext} gl 
+     * @param {String} id 
+     * @returns {WebGLShader|NULL}
+     */
     getShader(gl, id) {
         const script = document.getElementById(id);
         if (!script) {
@@ -59,11 +76,12 @@ const utils = {
             return null;
         }
   
-        gl.shaderSource(shader, shaderString);
-        gl.compileShader(shader);
+        gl.shaderSource( shader, shaderString );
+        gl.compileShader( shader );
     
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(shader));
+        if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) )
+        {
+            console.error( gl.getShaderInfoLog( shader ) );
             return null;
         }
     
