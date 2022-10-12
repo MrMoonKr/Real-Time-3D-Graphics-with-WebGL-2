@@ -3,7 +3,10 @@
 // Abstraction over common controls for user interaction with a 3D scene
 class Controls {
 
-    constructor( camera, canvas ) {
+    constructor( camera, canvasm, scene ) {
+
+        this.scene = scene;
+
         this.camera = camera;
         this.canvas = canvas;
         this.picker = null;
@@ -78,7 +81,7 @@ class Controls {
         if ( !this.picker ) return;
 
         const coordinates = this.get2DCoords( event );
-        this.picking = this.picker.find( coordinates );
+        this.picking = this.picker.find( coordinates, this.scene );
 
         if ( !this.picking ) this.picker.stop();
     }

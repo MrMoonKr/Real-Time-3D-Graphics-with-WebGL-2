@@ -2,6 +2,9 @@
 
 import { vec3, mat4 } from 'gl-matrix';
 
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 import utils from './common/Utils.js' ;
 import Clock from './common/Clock.js' ;
 import Program from './common/Program.js';
@@ -32,22 +35,27 @@ let camera;
  */
 let clock;
 
-let modelViewMatrix = mat4.create();
-let projectionMatrix = mat4.create();
-let normalMatrix = mat4.create();
+let modelViewMatrix     = mat4.create();
+let projectionMatrix    = mat4.create();
+let normalMatrix        = mat4.create();
 
-function configure() {
+function configure() 
+{
+    
     /**
      * @type {HTMLCanvasElement}
      */
     const canvas = utils.getCanvas( 'webgl-canvas' );
     utils.autoResizeCanvas( canvas );
-
+    
     gl = utils.getGLContext( canvas );
     gl.clearColor( 0.9, 0.9, 0.9, 1 );
     gl.clearDepth( 100 );
     gl.enable( gl.DEPTH_TEST );
     gl.depthFunc( gl.LEQUAL );
+    
+    
+    const controls = new OrbitControls( camera, canvas );
 
     // Configure `clock` which we can subscribe to on every `tick`.
     // We will discuss this in a later chapter, but it's simply a way to
@@ -130,11 +138,13 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv( program.uNormalMatrix, false, normalMatrix );
 }
 
-function draw() {
+function draw() 
+{
     gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-    try {
+    try 
+    {
         updateTransforms();
         setMatrixUniforms();
 
@@ -148,9 +158,12 @@ function draw() {
             gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, object.ibo );
 
             // Draw
-            if ( object.wireframe ) {
+            if ( object.wireframe ) 
+            {
                 gl.drawElements( gl.LINES, object.indices.length, gl.UNSIGNED_SHORT, 0 );
-            } else {
+            } 
+            else 
+            {
                 gl.drawElements( gl.TRIANGLES, object.indices.length, gl.UNSIGNED_SHORT, 0 );
             }
 
@@ -159,7 +172,9 @@ function draw() {
             gl.bindBuffer( gl.ARRAY_BUFFER, null );
             gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
         } );
-    } catch ( error ) {
+    } 
+    catch ( error ) 
+    {
         console.error( error );
     }
 }

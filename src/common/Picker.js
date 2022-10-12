@@ -3,7 +3,7 @@
 // Simple implementation of mouse picking on a HTML5 canvas
 class Picker {
 
-    constructor( canvas, callbacks ) {
+    constructor( canvas, gl, callbacks ) {
         this.pickedList = [];
 
         this.canvas = canvas;
@@ -14,6 +14,8 @@ class Picker {
         // Attach all callback onto instance
         Object.assign( this, callbacks );
 
+        this.gl = gl ;
+
         this.configure();
     }
 
@@ -23,6 +25,8 @@ class Picker {
             height
         } = this.canvas;
 
+        const gl = this.gl ;
+
         this.texture = gl.createTexture();
         gl.bindTexture( gl.TEXTURE_2D, this.texture );
         gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
@@ -31,7 +35,6 @@ class Picker {
         gl.bindRenderbuffer( gl.RENDERBUFFER, this.renderbuffer );
         gl.renderbufferStorage( gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height );
 
-        this.framebuffer = gl.createFramebuffer();
         gl.bindFramebuffer( gl.FRAMEBUFFER, this.framebuffer );
         gl.framebufferTexture2D( gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0 );
         gl.framebufferRenderbuffer( gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer );
@@ -51,6 +54,8 @@ class Picker {
             height
         } = this.canvas;
 
+        const gl = this.gl ;
+
         gl.bindTexture( gl.TEXTURE_2D, this.texture );
         gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
 
@@ -67,7 +72,10 @@ class Picker {
         );
     }
 
-    find( coords ) {
+    find( coords, scene ) {
+
+        const gl = this.gl ;
+
         const readout = new Uint8Array( 4 );
         gl.bindFramebuffer( gl.FRAMEBUFFER, this.framebuffer );
         gl.readPixels( coords.x, coords.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, readout );
