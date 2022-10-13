@@ -35,7 +35,7 @@ const utils = {
     // Given a canvas element, expand it to the size of the window
     // and ensure that it automatically resizes as the window changes
     /**
-     * 
+     * 웹윈도우의 resize이벤트에 맞추어 canvas 크기 조절. 꽉채운다
      * @param {HTMLCanvasElement} canvas 
      */
     autoResizeCanvas( canvas )
