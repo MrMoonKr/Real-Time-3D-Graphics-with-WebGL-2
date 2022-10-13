@@ -1,5 +1,6 @@
 //import path from 'path';
 const path = require( 'path' );
+const { webpack, SourceMapDevToolPlugin } = require( 'webpack' );
 
 module.exports = {
 
@@ -10,6 +11,7 @@ module.exports = {
         ch02_00_hello: './src/ch02_00_hello.js',
         ch04_00_model_view_translation: './src/ch04_00_model_view_translation.js',
         ch04_04_camera_type: './src/ch04_04_camera_types.js',
+        ch07_01_textured_cube: './src/ch07/ch07_01_textured_cube.js',
         ch08_04_picking_final: './src/ch08_04_picking_final.js'
     },
 
@@ -30,5 +32,15 @@ module.exports = {
     },
 
     devtool: 'source-map',
-    //watch: true
+
+    plugins: [
+        // https://webpack.js.org/plugins/source-map-dev-tool-plugin
+        new SourceMapDevToolPlugin( {
+            filename:'[file].map',
+            //append: '\n//# sourceMappingURL=[file].map'
+            append: '\n//# sourceMappingURL=[name].bundle.js.map'
+        } )
+    ],
+
+    watch: true
 }

@@ -3,7 +3,7 @@
 // Abstraction over common controls for user interaction with a 3D scene
 class Controls {
 
-    constructor( camera, canvasm, scene ) {
+    constructor( camera, canvas, scene ) {
 
         this.scene = scene;
 

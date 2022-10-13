@@ -1,6 +1,7 @@
 'use strict';
 
 import utils from "./Utils.js";
+import Texture from "./Texture.js";
 
 // Manages objects in a 3D scene
 class Scene {
