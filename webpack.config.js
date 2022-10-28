@@ -8,11 +8,13 @@ module.exports = {
 
     entry: {
         ch01_00_hello:                      './src/ch01_00_hello.js',
+        ch01_00_typescript:                 './src/ch01/ch01_00_typescript.ts',
         ch02_00_hello:                      './src/ch02_00_hello.js',
         ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',
         ch04_04_camera_type:                './src/ch04_04_camera_types.js',
         ch07_01_textured_cube:              './src/ch07/ch07_01_textured_cube.js',
         ch07_02_textured_cube_final:        './src/ch07/ch07_02_textured_cube_final.js',
+        ch07_06_multi_texture_final:        './src/ch07/ch07_06_multi_texture_final.js',
         ch08_04_picking_final:              './src/ch08_04_picking_final.js'
     },
 
@@ -43,5 +45,25 @@ module.exports = {
         } )
     ],
 
-    watch: true
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                loader: 'ts-loader',
+                options: {
+                    compilerOptions: {
+                        module: 'esnext',
+                        declaration: false
+                    }
+                }
+            }
+        ]
+    },
+
+    resolve: {
+        extensions: [ '.js', '.ts' ]
+    }
+
+    //watch: true
 }

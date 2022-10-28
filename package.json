@@ -2,7 +2,7 @@
   "name": "real-time-3d-graphics-with-webgl-2",
   "version": "1.0.0",
   "scripts": {
-    "build": "webpack build"
+    "build": "rimraf dist && webpack build"
   },
   "dependencies": {
     "dat.gui": "^0.7.9",
@@ -10,6 +10,9 @@
     "three": "^0.145.0"
   },
   "devDependencies": {
+    "rimraf": "^3.0.2",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   }
