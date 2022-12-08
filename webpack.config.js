@@ -11,12 +11,21 @@ module.exports = {
         ch01_00_typescript:                 './src/ch01/ch01_00_typescript.ts',
         ch01_02_context:                    './src/ch01/ch01_02_context.ts',
         ch01_05_attributes:                 './src/ch01/ch01_05_attributes.ts',
+
         ch02_00_hello:                      './src/ch02/ch02_00_hello.ts',
+        ch02_01_square:                     './src/ch02/ch02_01_square.ts',
+        ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
+        
+        ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
+
+
         ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',
         ch04_04_camera_type:                './src/ch04_04_camera_types.js',
+
         ch07_01_textured_cube:              './src/ch07/ch07_01_textured_cube.js',
         ch07_02_textured_cube_final:        './src/ch07/ch07_02_textured_cube_final.js',
         ch07_06_multi_texture_final:        './src/ch07/ch07_06_multi_texture_final.js',
+        
         ch08_04_picking_final:              './src/ch08_04_picking_final.js'
     },
 

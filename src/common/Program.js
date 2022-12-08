@@ -2,6 +2,8 @@
 
 import utils from "./Utils.js";
 
+import ProgramShader from "./ProgramShader.js";
+
 // Program constructor that takes a WebGL context and script tag IDs
 // to extract vertex and fragment shader source code from the page
 class Program {
@@ -79,6 +81,35 @@ class Program {
     getUniform( uniformLocation ) 
     {
         return this.gl.getUniform( this.program, uniformLocation );
+    }
+
+    /**
+     * 
+     * @param {WebGL2RenderingContext} gl 
+     * @param {string} vertCode 
+     * @param {string} fragCode 
+     * @returns {WebGLProgram|null}
+     */
+    static initProgram( gl, vertCode, fragCode ) 
+    {
+        const vertexShader   = ProgramShader.compileShader( gl, vertCode, gl.VERTEX_SHADER );
+        const fragmentShader = ProgramShader.compileShader( gl, fragCode, gl.FRAGMENT_SHADER );
+
+        const program = gl.createProgram();
+        gl.attachShader( program, vertexShader );
+        gl.attachShader( program, fragmentShader );
+        gl.linkProgram( program );
+    
+        if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) 
+        {
+            console.error( "[e] shader program error : " + gl.getProgramInfoLog( program ) ) ;
+            gl.deleteProgram( program );
+            return null;
+        }
+
+        gl.useProgram( program );
+
+        return program;
     }
 
 }
