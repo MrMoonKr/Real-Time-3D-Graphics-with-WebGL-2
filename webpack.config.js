@@ -8,6 +8,7 @@ module.exports = {
 
     entry: {
         ch01_00_hello:                      './src/ch01_00_hello.js',
+        ch01_00_javascript:                 './src/ch01/ch01_00_javascript.js',
         ch01_00_typescript:                 './src/ch01/ch01_00_typescript.ts',
         ch01_02_context:                    './src/ch01/ch01_02_context.ts',
         ch01_05_attributes:                 './src/ch01/ch01_05_attributes.ts',

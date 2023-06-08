@@ -9,9 +9,6 @@ helloModule.print_hello( "함수 인텔리센스 동작 확인용" );
 //print_hello( "함수 인텔리센스 동작 확인용" );
 
 
-//import * as glMatrix from 'https://cdn.skypack.dev/gl-matrix';
-//import * as glMatrix from '/lib/esm/common.js' ;
-//import {glMatrix} from '/node_modules/gl-matrix/esm/index.js';
 import { glMatrix } from 'gl-matrix' ;
 
 let a = glMatrix.EPSILON ;
