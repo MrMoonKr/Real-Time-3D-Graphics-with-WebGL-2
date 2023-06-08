@@ -1,8 +1,9 @@
 
 
 /**
- * 단순 환영 문자열 컨솔에 출력
+ * 단순 문자열 console.log()로 출력
+ * @param {string} msg 
  */
-export function print_hello() {
-    console.log( '안녕하세요' );
+export function print_hello( msg ) {
+    console.log( msg );
 }
