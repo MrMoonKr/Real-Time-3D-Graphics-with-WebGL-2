@@ -9,7 +9,7 @@ const utils = {
      * @param {String} id DOM Element ID
      * @returns {HTMLCanvasElement|NULL}
      */
-    getCanvas(id) 
+    getCanvas( id )
     {
         const canvas = document.getElementById(id);
   
@@ -57,22 +57,27 @@ const utils = {
      * @param {String} id 
      * @returns {WebGLShader|NULL}
      */
-    getShader(gl, id) {
-        const script = document.getElementById(id);
-        if (!script) {
+    getShader( gl, id )
+    {
+        const script = document.getElementById( id );
+        if ( !script )
+        {
             return null;
         }
   
         const shaderString = script.text.trim();
     
         let shader;
-        if (script.type === 'x-shader/x-vertex') {
-            shader = gl.createShader(gl.VERTEX_SHADER);
+        if ( script.type === 'x-shader/x-vertex' )
+        {
+            shader = gl.createShader( gl.VERTEX_SHADER );
         }
-        else if (script.type === 'x-shader/x-fragment') {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        else if ( script.type === 'x-shader/x-fragment' )
+        {
+            shader = gl.createShader( gl.FRAGMENT_SHADER );
         }
-        else {
+        else
+        {
             return null;
         }
   

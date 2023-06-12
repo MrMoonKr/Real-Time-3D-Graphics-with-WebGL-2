@@ -1,3 +1,65 @@
+# Real-Time 3D Graphics with WebGL 2
+
+웹브라우저에서 동작하는 WebGL 2 API 관련 도서의 예제입니다.  
+
+[도서 홈페이지](https://www.packtpub.com/product/real-time-3d-graphics-with-webgl-2-second-edition/9781788629690)  
+[도서 오픈소스](https://github.com/packtpublishing/real-time-3d-graphics-with-webgl-2)  
+
+## 개발환경
+
+효율적인 개발 환경 구축.  
+인텔리센스와 디버깅이 가능하게 구축하도록 한다.  
+
+- os : Windows 10
+- nvm : node version manager
+- node.js
+- webpack
+- vs code
+- live server
+- glsl lint
+- gl-matrix
+
+## 자바스크립트  
+
+webgl은 웹브라우저에서 실행된다.  
+ESM ( ECMAScript Module ) 형태로 소스 작성 후 webpack으로 번들링.  
+
+- nvm : node version manager
+- node.js + npm : devops
+- vs code : editor
+- live server , glsl lint , webpack , gl-matrix
+-
+
+## 3차원 수학
+
+- gl-matrix
+-
+
+## 렌더링 파이프라인
+
+- VBO : vertex buffer object
+- Vertex Attributes
+- Vertex Shader
+- Uniforms , Varings
+- Fragment Shader
+- Depth Test
+- Alpha Blending
+- Frame Buffer
+
+## 프레임워크
+
+- three.js
+- babylon.js
+- aframe.js
+-
+
+## 키워드
+-
+-
+-
+-
+
+
 
 
 

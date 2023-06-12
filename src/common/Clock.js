@@ -4,10 +4,13 @@ import EventEmitter from "./EventEmitter.js";
 
 // Abstracts away the requestAnimationFrame in an effort to provie a clock instance
 // to sync various parts of an application
-class Clock extends EventEmitter {
+class Clock extends EventEmitter
+{
 
-    constructor() {
+    constructor()
+    {
         super();
+
         this.isRunning = true;
 
         this.tick = this.tick.bind( this );
@@ -25,20 +28,25 @@ class Clock extends EventEmitter {
     }
 
     // Gets called on every requestAnimationFrame cycle
-    tick() {
-        if ( this.isRunning ) {
+    tick()
+    {
+        if ( this.isRunning )
+        {
             this.emit( 'tick' );
         }
+
         requestAnimationFrame( this.tick );
     }
 
     // Starts the clock
-    start() {
+    start()
+    {
         this.isRunning = true;
     }
 
     // Stops the clock
-    stop() {
+    stop()
+    {
         this.isRunning = false;
     }
 
