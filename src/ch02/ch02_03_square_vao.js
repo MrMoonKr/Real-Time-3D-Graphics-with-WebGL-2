@@ -1,16 +1,25 @@
-//'use strict';
-// @ts-nocheck
+'use strict';
 
 import utils from '../common/Utils.js';
 
-let canvas: HTMLCanvasElement ;
-let gl: WebGL2RenderingContext ;
-let program: WebGLProgram ;
-let squareVertexBuffer: WebGLBuffer ;
-let squareIndexBuffer: WebGLBuffer ;
-let indices: Array<number>;
+/** @type { HTMLCanvasElement } */
+let canvas;
+/** @type { WebGL2RenderingContext } */
+let gl;
+/** @type { WebGLProgram } */
+let program;
+/** @type { WebGLBuffer } */
+let squareVertexBuffer;
+/** @type { WebGLBuffer } */
+let squareIndexBuffer;
+/** @type { Array<number> } */
+let indices;
+/** @type { WebGLVertexArrayObject } */
+let squareVAO;
 
-const vertCode = `#version 300 es
+/** @type { string } */
+const vertCode = 
+`#version 300 es
 #pragma vscode_glsllint_stage: vert
 
 precision mediump float;
@@ -22,8 +31,7 @@ void main( void )
 {
     // Set the position in clipspace coordinates
     gl_Position = vec4( aVertexPosition, 1.0 );
-}
-`;
+}`;
 
 const fragCode =
 `#version 300 es
@@ -38,18 +46,18 @@ void main( void )
 {
     // Set the result as red
     fragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
-}
-`;
+}`;
 
 /**
  * 
- * @param shaderCode Shader source code
- * @param shaderType WebGL2RenderingContext.VERTEX_SHADER | WebGL2RenderingContext.FRAGMENT_SHADER
- * @returns 
+ * @param {string} shaderCode Shader source code
+ * @param {number} shaderType WebGL2RenderingContext.VERTEX_SHADER | WebGL2RenderingContext.FRAGMENT_SHADER
+ * @returns {WebGLShader}
  */
-function compileShader( shaderCode: string, shaderType: number ): WebGLShader
+function compileShader( shaderCode, shaderType )
 {
-    let shader: WebGLShader;
+    /** @type {WebGLShader} */
+    let shader;
     if ( shaderType === gl.VERTEX_SHADER ) 
     {
         shader = gl.createShader( gl.VERTEX_SHADER );
@@ -77,16 +85,17 @@ function compileShader( shaderCode: string, shaderType: number ): WebGLShader
     return shader;
 }
 
-// Create a program with the appropriate vertex and fragment shaders
-function initProgram( vertCode: string, fragCode: string ) 
+/**
+ * Create a program with the appropriate vertex and fragment shaders
+ * @param {string} vertCode 
+ * @param {string} fragCode 
+ */
+function initProgram( vertCode, fragCode ) 
 {
-    //const vertexShader   = getShader( 'vertex-shader' );
-    //const fragmentShader = getShader( 'fragment-shader' );
     const vertexShader   = compileShader( vertCode, gl.VERTEX_SHADER );
     const fragmentShader = compileShader( fragCode, gl.FRAGMENT_SHADER );
-    // Create a program
+
     program = gl.createProgram();
-    // Attach the shaders to this program
     gl.attachShader( program, vertexShader );
     gl.attachShader( program, fragmentShader );
     gl.linkProgram( program );
@@ -97,8 +106,8 @@ function initProgram( vertCode: string, fragCode: string )
         console.error( "[e] shader program error : " + gl.getProgramInfoLog( program ) ) ;
     }
 
-    // Use this program instance
     gl.useProgram( program );
+    
     // We attach the location of these shader values to the program instance
     // for easy access later in the code
     program.aVertexPosition = gl.getAttribLocation( program, 'aVertexPosition' );
@@ -130,10 +139,19 @@ function initBuffers()
     // Indices defined in counter-clockwise order
     indices = [0, 1, 2, 0, 2, 3];
 
-    // Setting up the VBO
-    squareVertexBuffer = gl.createBuffer();
+    // Create VAO instance
+    squareVAO = gl.createVertexArray();
+
+    // Bind it so we can work on it
+    gl.bindVertexArray( squareVAO );
+
+    const squareVertexBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, squareVertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.STATIC_DRAW );
+
+    // Provide instructions for VAO to use data later in draw
+    gl.enableVertexAttribArray( program.aVertexPosition );
+    gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
 
     // Setting up the IBO
     squareIndexBuffer = gl.createBuffer();
@@ -141,6 +159,7 @@ function initBuffers()
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( indices ), gl.STATIC_DRAW );
 
     // Clean
+    gl.bindVertexArray( null ) ;
     gl.bindBuffer( gl.ARRAY_BUFFER, null );
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 }
@@ -152,20 +171,14 @@ function draw()
     gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-    // Use the buffers we've constructed
-    gl.bindBuffer( gl.ARRAY_BUFFER, squareVertexBuffer );
-    gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( program.aVertexPosition );
-
-    // Bind IBO
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer );
+    // Bind the VAO
+    gl.bindVertexArray( squareVAO );
 
     // Draw to the scene using triangle primitives
     gl.drawElements( gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0 );
 
     // Clean
-    gl.bindBuffer( gl.ARRAY_BUFFER, null );
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+    gl.bindVertexArray( null );
 }
 
 // Entry point to our application

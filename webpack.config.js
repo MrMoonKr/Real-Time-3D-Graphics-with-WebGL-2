@@ -1,6 +1,10 @@
 //import path from 'path';
 const path = require( 'path' );
 const { webpack, SourceMapDevToolPlugin } = require( 'webpack' );
+const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
+
+let HtmlWebpackPlugins = [] ;
+
 
 module.exports = {
 
@@ -11,11 +15,14 @@ module.exports = {
         ch01_00_javascript:                 './src/ch01/ch01_00_javascript.js',
         ch01_00_typescript:                 './src/ch01/ch01_00_typescript.ts',
         ch01_02_context:                    './src/ch01/ch01_02_context.ts',
-        ch01_05_attributes:                 './src/ch01/ch01_05_attributes.ts',
+        ch01_05_attributes:                 './src/ch01/ch01_05_attributes.js',
+        //ch01_05_attributes:                 './src/ch01/ch01_05_attributes.ts',
 
         ch02_00_hello:                      './src/ch02/ch02_00_hello.ts',
-        ch02_01_square:                     './src/ch02/ch02_01_square.ts',
-        ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
+        ch02_01_square:                     './src/ch02/ch02_01_square.js',
+        ch02_02_square_arrays:              './src/ch02/ch02_02_square_arrays.js',
+        ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.js',
+        //ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
         
         ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
 
@@ -54,7 +61,15 @@ module.exports = {
             filename:'[file].map',
             //append: '\n//# sourceMappingURL=[file].map'
             append: '\n//# sourceMappingURL=[name].bundle.js.map'
-        } )
+        } ) ,
+
+        /*new HtmlWebpackPlugin( {
+            //title: '[file]',
+            filename: ( entryName ) => {
+                return entryName + '.html';
+            } ,
+            template: './src/template.html'
+        } )*/
     ],
 
     module: {
