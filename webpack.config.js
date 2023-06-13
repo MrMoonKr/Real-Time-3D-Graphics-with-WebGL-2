@@ -25,6 +25,7 @@ module.exports = {
         //ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
         
         ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
+        ch03_01_goraud_lambert:             './src/ch03/ch03_01_goraud_lambert.js',
 
 
         ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',
