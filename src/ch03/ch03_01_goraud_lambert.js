@@ -2,6 +2,7 @@
 
 import utils from '../common/Utils.js';
 import * as glm from 'gl-matrix' ;
+import * as dat from 'dat.gui';
 
 /** @type { HTMLCanvasElement } */
 let canvas;
@@ -129,6 +130,8 @@ class App
 
         this.initBuffers();
 
+        this.initControls();
+
     }
 
     draw()
@@ -160,6 +163,21 @@ class App
         gl.bindVertexArray( null );
         gl.bindBuffer( gl.ARRAY_BUFFER, null );
         gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+    }
+    
+    initControls()
+    {
+        //this.gui = new dat.GUI() ;
+
+        //this.gui.add( app, 'sphereColor' );
+
+
+        // utils.configureControls( {
+        //     '메시색상' : {
+        //         value: this.sphereColor,
+        //         onChange: ( v ) => { }
+        //     },
+        // } );
     }
 
     initBuffers() 
@@ -211,6 +229,11 @@ class App
 
         gl.uniform3fv( this.program.uLightDiffuse, this.lightDiffuseColor );
         gl.uniform3fv( this.program.uLightDirection, this.ligthDirection );
+    }
+
+    updateMeshColor()
+    {
+        this.initLights( this.gl );
     }
 
     /**
@@ -292,6 +315,17 @@ function init()
 
     app = new App( canvas ) ;
     app.init( vertCode, fragCode );
+
+    let gui = new dat.GUI() ;
+    let guiModel = {} ;
+    guiModel['메시 색상'] = utils.denormalizeColor( app.sphereColor );
+
+    let sphereColor = gui.addColor( guiModel, '메시 색상' );
+    sphereColor.onChange( ( v ) => {
+        app.sphereColor = utils.normalizeColor( v );
+        console.log( app.sphereColor );
+        app.updateMeshColor();
+    } );
 
     render() ;
 }
