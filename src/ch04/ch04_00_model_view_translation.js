@@ -1,16 +1,23 @@
 'use strict';
 
-import utils from '../common/Utils.js';
 import * as glm from 'gl-matrix' ;
 import * as dat from 'dat.gui';
 
-/** @type { HTMLCanvasElement } */
-let canvas;
+import utils from '../common/Utils.js';
 
-/** @type { App } */
+/** 
+ * @type { HTMLCanvasElement } 
+ */
+let canvas = null;
+
+/**
+ * @type { App }
+ */
 let app = null ;
 
-/** @type { string } */
+/** 
+ * @type { string }
+ */
 const vertCode = 
 `#version 300 es
 #pragma vscode_glsllint_stage: vert
@@ -20,34 +27,51 @@ precision mediump float;
 uniform mat4    uModelViewMatrix;
 uniform mat4    uProjectionMatrix;
 uniform mat4    uNormalMatrix;
-uniform vec3    uLightDirection;
-uniform vec3    uLightDiffuse;
-uniform vec3    uMaterialDiffuse;
+uniform vec3    uLightPosition;
+uniform vec4    uLightAmbient;
+uniform vec4    uLightDiffuse;
+uniform vec4    uMaterialDiffuse;
+uniform bool    uWireframe;
 
 in vec3         aVertexPosition;
 in vec3         aVertexNormal;
+in vec4         aVertexColor;
 
-out vec4        vVertexColor;
+out vec4        vFinalColor;
 
 void main( void ) 
 {
-    // Calculate the normal vector
-    vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
+    if ( uWireframe )
+    {
+        vFinalColor = uMaterialDiffuse;
+    }
+    else
+    {
+        // Calculate the normal vector
+        vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 0.0 ) ) ) ;
 
-    // Normalized light direction
-    vec3 L      = normalize( uLightDirection ) ;
+        // Normalized light position
+        vec3 L      = normalize( -uLightPosition ) ;
 
-    // Dot product of the normal product and negative light direction vector
-    float lambertTerm = dot( N, -L ) ;
+        // Dot product of the normal product and negative light direction vector
+        float lambertTerm = dot( N, -L ) ;
+        if ( lambertTerm == 0.0 )
+        {
+            lambertTerm = 0.01;
+        }
 
-    // Calculating the diffuse color based on the Lambertian reflection model
-    vec3 Id     = uMaterialDiffuse * uLightDiffuse * lambertTerm ;
+        // Ambient Lighting
+        vec4 Ia     = uLightAmbient ;
 
-    // Set the varying to be used inside of the fragment shader
-    vVertexColor = vec4( Id, 1.0 );
+        // Calculating the diffuse color based on the Lambertian reflection model
+        vec4 Id     = uMaterialDiffuse * uLightDiffuse * lambertTerm ;
 
-    // Setting the vertex position
-    gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
+        // Set the varying to be used inside of the fragment shader
+        vFinalColor = vec4( vec3( Ia + Id ), 1.0 );
+
+        // Setting the vertex position
+        gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
+    }
 
 }`;
 
@@ -58,7 +82,7 @@ const fragCode =
 precision mediump float;
 
 // Expect the interpolated value from the vertex shader
-in vec4 vVertexColor;
+in vec4 vFinalColor;
 
 // Return the final color as fragColor
 out vec4 fragColor;
@@ -66,7 +90,7 @@ out vec4 fragColor;
 void main( void )
 {
     // Simply set the value passed in from the vertex shader
-    fragColor = vVertexColor;
+    fragColor = vFinalColor;
 }`;
 
 
@@ -75,13 +99,17 @@ class App
 
     constructor( canvasElement ) 
     {
-        /** @type { HTMLCanvasElement } */
+        /** 
+         * @type { HTMLCanvasElement } 
+         */
         this.canvas = canvasElement ;
-
-        /** @type { WebGL2RenderingContext } */
+        /**
+         * @type { WebGL2RenderingContext }
+         */
         this.gl = null;
-
-        /** @type { WebGLProgram } */
+        /**
+         * @type { WebGLProgram }
+         */
         this.program = null;
 
         /** @type { WebGLVertexArrayObject } */
@@ -103,11 +131,21 @@ class App
         this.ligthDirection = [ 0, -1, -1 ];
         this.sphereColor = [ 0.5, 0.8, 0.1 ];
 
-        /** @type {glm.mat4} */
+        /**
+         * @type { glm.pipomat4 }
+         */
+        this.cameraMatrix = glm.mat4.create();
+        /**
+         * @type { glm.mat4 }
+         */
         this.modelViewMatrix = glm.mat4.create();
-        /** @type {glm.mat4} */
+        /**
+         * @type {glm.mat4}
+         */
         this.projectionMatrix = glm.mat4.create();
-        /** @type {glm.mat4} */
+        /**
+         * @type {glm.mat4}
+         */
         this.normalMatrix = glm.mat4.create();
 
     }
@@ -167,15 +205,9 @@ class App
     
     initControls()
     {
-        utils.configureControls( {
-            '메시 색상': {
-                value: utils.denormalizeColor( this.sphereColor ),
-                onChange: ( v ) => { 
-                    this.sphereColor = utils.normalizeColor( v ) ;
-                    this.updateMeshColor();
-                }
-            }
-        })
+        //this.gui = new dat.GUI() ;
+
+        //this.gui.add( app, 'sphereColor' );
 
 
         // utils.configureControls( {
@@ -322,7 +354,16 @@ function init()
     app = new App( canvas ) ;
     app.init( vertCode, fragCode );
 
-    
+    let gui = new dat.GUI() ;
+    let guiModel = {} ;
+    guiModel['메시 색상'] = utils.denormalizeColor( app.sphereColor );
+
+    let sphereColor = gui.addColor( guiModel, '메시 색상' );
+    sphereColor.onChange( ( v ) => {
+        app.sphereColor = utils.normalizeColor( v );
+        console.log( app.sphereColor ); 
+        app.updateMeshColor();
+    } );
 
     render() ;
 }

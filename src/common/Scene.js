@@ -4,7 +4,12 @@ import utils from "./Utils.js";
 import Texture from "./Texture.js";
 
 // Manages objects in a 3D scene
-class Scene {
+
+/**
+ * 간단한 오브젝트 컨테이너
+ */
+class Scene 
+{
 
     /**
      * 
@@ -142,7 +147,8 @@ class Scene {
             gl.vertexAttribPointer( program.aVertexTextureCoords, 2, gl.FLOAT, false, 0, 0 );
 
             // Tangents
-            if ( program.aVertexTangent >= 0 ) {
+            if ( program.aVertexTangent >= 0 ) 
+            {
                 const tangentBufferObject = gl.createBuffer();
                 gl.bindBuffer( gl.ARRAY_BUFFER, tangentBufferObject );
                 gl.bufferData( gl.ARRAY_BUFFER, 
@@ -170,15 +176,21 @@ class Scene {
     }
 
     // Traverses over every item in the scene
-    traverse( cb ) {
-        for ( let i = 0; i < this.objects.length; i++ ) {
+    traverse( cb ) 
+    {
+        for ( let i = 0 ; i < this.objects.length ; i++ ) 
+        {
             // Break out of the loop as long as any value is returned
-            if ( cb( this.objects[ i ], i ) !== undefined ) break;
+            if ( cb( this.objects[ i ], i ) !== undefined ) 
+            {
+                break;
+            }
         }
     }
 
     // Removes an item from the scene with a given alias
-    remove( alias ) {
+    remove( alias ) 
+    {
         const object = this.get( alias );
         const index = this.objects.indexOf( object );
         this.objects.splice( index, 1 );
@@ -235,5 +247,6 @@ class Scene {
     }
 
 }
+
 
 export default Scene;

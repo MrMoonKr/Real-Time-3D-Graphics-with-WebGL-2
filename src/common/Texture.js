@@ -21,12 +21,10 @@ class Texture {
     }
 
     // Configure texture
-    handleLoadedTexture() {
-        const {
-            gl,
-            image,
-            glTexture
-        } = this;
+    handleLoadedTexture()
+    {
+        const { gl, image, glTexture } = this;
+
         // Bind
         gl.bindTexture( gl.TEXTURE_2D, glTexture );
         // Configure

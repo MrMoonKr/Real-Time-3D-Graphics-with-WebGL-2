@@ -55,7 +55,7 @@ function configure()
     gl.depthFunc( gl.LEQUAL );
     
     
-    const controls = new OrbitControls( camera, canvas );
+    //const controls = new OrbitControls( camera, canvas );
 
     // Configure `clock` which we can subscribe to on every `tick`.
     // We will discuss this in a later chapter, but it's simply a way to
@@ -100,7 +100,7 @@ function configure()
     new Controls( camera, canvas );
 
     // Configure lights
-    gl.uniform3fv( program.uLightPosition, [ 0, 120, 120 ] );
+    gl.uniform3fv( program.uLightPosition, [ 10, 100, 100 ] );
     gl.uniform4fv( program.uLightAmbient, [ 0.20, 0.20, 0.20, 1 ] );
     gl.uniform4fv( program.uLightDiffuse, [ 1, 1, 1, 1 ] );
 
@@ -111,14 +111,23 @@ function configure()
 function load() {
     scene.add( new Floor( 80, 2 ) );
     scene.add( new Axis( 82 ) );
-    scene.load( '/common/models/geometries/cone3.json', 'cone' );
+    //scene.load( '/common/models/geometries/cone1.json', 'cone' );
+    scene.load( '/common/models/geometries/cone2.json', 'cone' );
+    //scene.load( '/common/models/geometries/cone3.json', 'cone' );
+    
+    scene.load( '/common/models/geometries/cylinder.json', 'cylinder' );
+
+    scene.load( '/common/models/geometries/sphere1.json', 'sphere' );
 }
 
 // Initialize the necessary transforms
-function initTransforms() {
+function initTransforms() 
+{
     modelViewMatrix = camera.getViewTransform();
+
     mat4.identity( projectionMatrix );
     updateTransforms();
+    
     mat4.identity( normalMatrix );
     mat4.copy( normalMatrix, modelViewMatrix );
     mat4.invert( normalMatrix, normalMatrix );
@@ -190,58 +199,58 @@ function init() {
 window.onload = init;
 
 function initControls() {
-    utils.configureControls( {
-        'Camera Type': {
-            value: camera.type,
-            options: [ Camera.TRACKING_TYPE, Camera.ORBITING_TYPE ],
-            onChange: v => {
-                camera.goHome();
-                camera.setType( v );
-            }
-        },
-        Dolly: {
-            value: 0,
-            min: -100,
-            max: 100,
-            step: 0.1,
-            onChange: v => camera.dolly( v )
-        },
-        Position: {
-            ...[ 'X', 'Y', 'Z' ].reduce( ( result, name, i ) => {
-                result[ name ] = {
-                    value: camera.position[ i ],
-                    min: -100,
-                    max: 100,
-                    step: 0.1,
-                    onChange: ( v, state ) => {
-                        camera.setPosition( [
-                            state.X,
-                            state.Y,
-                            state.Z
-                        ] );
-                    }
-                };
-                return result;
-            }, {} ),
-        },
-        Rotation: {
-            Elevation: {
-                value: camera.elevation,
-                min: -180,
-                max: 180,
-                step: 0.1,
-                onChange: v => camera.setElevation( v )
-            },
-            Azimuth: {
-                value: camera.azimuth,
-                min: -180,
-                max: 180,
-                step: 0.1,
-                onChange: v => camera.setAzimuth( v )
-            }
-        },
-        'Go Home': () => camera.goHome()
-    } );
+    // utils.configureControls( {
+    //     'Camera Type': {
+    //         value: camera.type,
+    //         options: [ Camera.TRACKING_TYPE, Camera.ORBITING_TYPE ],
+    //         onChange: v => {
+    //             camera.goHome();
+    //             camera.setType( v );
+    //         }
+    //     },
+    //     Dolly: {
+    //         value: 0,
+    //         min: -100,
+    //         max: 100,
+    //         step: 0.1,
+    //         onChange: v => camera.dolly( v )
+    //     },
+    //     Position: {
+    //         ...[ 'X', 'Y', 'Z' ].reduce( ( result, name, i ) => {
+    //             result[ name ] = {
+    //                 value: camera.position[ i ],
+    //                 min: -100,
+    //                 max: 100,
+    //                 step: 0.1,
+    //                 onChange: ( v, state ) => {
+    //                     camera.setPosition( [
+    //                         state.X,
+    //                         state.Y,
+    //                         state.Z
+    //                     ] );
+    //                 }
+    //             };
+    //             return result;
+    //         }, {} ),
+    //     },
+    //     Rotation: {
+    //         Elevation: {
+    //             value: camera.elevation,
+    //             min: -180,
+    //             max: 180,
+    //             step: 0.1,
+    //             onChange: v => camera.setElevation( v )
+    //         },
+    //         Azimuth: {
+    //             value: camera.azimuth,
+    //             min: -180,
+    //             max: 180,
+    //             step: 0.1,
+    //             onChange: v => camera.setAzimuth( v )
+    //         }
+    //     },
+    //     'Go Home': () => camera.goHome()
+    // } );
 
     // On every `tick` (i.e. requestAnimationFrame cycle), invoke callback
     clock.on( 'tick', () => {

@@ -28,7 +28,8 @@ module.exports = {
         ch03_01_goraud_lambert:             './src/ch03/ch03_01_goraud_lambert.js',
 
 
-        ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',
+        //ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',
+        ch04_00_model_view_translation:     './src/ch04/ch04_00_model_view_translation.js',
         ch04_04_camera_type:                './src/ch04_04_camera_types.js',
 
         ch07_01_textured_cube:              './src/ch07/ch07_01_textured_cube.js',
