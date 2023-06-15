@@ -139,7 +139,7 @@ class App
         const gl = this.gl ;
         const mat4 = glm.mat4 ;
 
-        mat4.perspective( this.projectionMatrix, 45, gl.canvas.width / gl.canvas.height, 0.1, 10000 );
+        mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
         mat4.identity( this.modelViewMatrix );
         mat4.translate( this.modelViewMatrix, this.modelViewMatrix, [ 0, 0, -3.5 ] );
 
