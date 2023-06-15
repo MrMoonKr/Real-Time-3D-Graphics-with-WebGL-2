@@ -174,16 +174,34 @@ class App
                     this.sphereColor = utils.normalizeColor( v ) ;
                     this.updateMeshColor();
                 }
+            },
+            ...[ 'Translate X', 'Translate Y', 'Translate Z' ].reduce( ( result, name, i ) => {
+                result[ name ] = {
+                    value: this.ligthDirection[ i ],
+                    min: -10,
+                    max: 10,
+                    step: -0.1,
+                    onChange: ( v, state ) => {
+                        this.gl.uniform3fv( this.program.uLightDirection, [
+                            -state[ 'Translate X' ],
+                            -state[ 'Translate Y' ],
+                             state[ 'Translate Z' ]
+                        ] );
+                    }
+                };
+                return result;
+            }, {} ),
+            '폴더 테스트': {
+                '메시 색상': {
+                    value: utils.denormalizeColor( this.sphereColor ),
+                    onChange: ( v ) => { 
+                        this.sphereColor = utils.normalizeColor( v ) ;
+                        this.updateMeshColor();
+                    }
+                }
             }
-        })
+        } );
 
-
-        // utils.configureControls( {
-        //     '메시색상' : {
-        //         value: this.sphereColor,
-        //         onChange: ( v ) => { }
-        //     },
-        // } );
     }
 
     initBuffers() 
