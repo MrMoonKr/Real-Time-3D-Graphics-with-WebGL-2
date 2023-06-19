@@ -46,4 +46,4 @@ class Axis
 }
 
 
-export default Axis;
+//export default Axis;
