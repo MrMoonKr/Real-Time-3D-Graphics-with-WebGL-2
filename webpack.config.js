@@ -23,6 +23,7 @@ module.exports = {
         ch02_02_square_arrays:              './src/ch02/ch02_02_square_arrays.js',
         ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.js',
         //ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
+        ch02_04_rendering_modes:            './src/ch02/ch02_04_rendering_modes.js',
         
         ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
         ch03_01_goraud_lambert:             './src/ch03/ch03_01_goraud_lambert.js',
