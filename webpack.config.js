@@ -25,6 +25,8 @@ module.exports = {
         //ch02_03_square_vao:                 './src/ch02/ch02_03_square_vao.ts',
         ch02_04_rendering_modes:            './src/ch02/ch02_04_rendering_modes.js',
         
+        ch02_09_ajax_car_final:             './src/ch02/ch02_09_ajax_car_final.js',
+        
         ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
         ch03_01_goraud_lambert:             './src/ch03/ch03_01_goraud_lambert.js',
 
