@@ -29,6 +29,7 @@ module.exports = {
         
         ch03_00_hello:                      './src/ch03/ch03_00_hello.js',
         ch03_01_goraud_lambert:             './src/ch03/ch03_01_goraud_lambert.js',
+        ch03_02_moving_light:               './src/ch03/ch03_02_moving_light.js',
 
 
         //ch04_00_model_view_translation:     './src/ch04_00_model_view_translation.js',

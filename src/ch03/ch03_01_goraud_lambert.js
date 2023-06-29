@@ -4,13 +4,19 @@ import utils from '../common/Utils.js';
 import * as glm from 'gl-matrix' ;
 import * as dat from 'dat.gui';
 
-/** @type { HTMLCanvasElement } */
+/**
+ * @type { HTMLCanvasElement } WebGL용 캔버스 요소
+ */
 let canvas;
 
-/** @type { App } */
+/** 
+ * @type { App } 로직 진행
+ */
 let app = null ;
 
-/** @type { string } */
+/**
+ * @type { string } 정점셰이더
+ */
 const vertCode = 
 `#version 300 es
 #pragma vscode_glsllint_stage: vert
