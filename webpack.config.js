@@ -90,6 +90,11 @@ module.exports = {
                         declaration: false
                     }
                 }
+            },
+            {
+                test: /\.(glsl|vert|frag|vs|fs)$/,
+                exclude: /node_modules/,
+                loader: 'webpack-glsl-loader'
             }
         ]
     },

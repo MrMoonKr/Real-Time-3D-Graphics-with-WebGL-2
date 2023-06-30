@@ -4,6 +4,9 @@ import * as glm from 'gl-matrix' ;
 
 import utils from '../common/Utils.js';
 
+import vert from '../shaders/ch02/ch02_09.vert';
+import frag from '../shaders/ch02/ch02_09.frag';
+
 /** 
  * @type { HTMLCanvasElement } 
  */
@@ -385,7 +388,8 @@ function init()
     gl.clearColor( 0.2, 0.2, 0.2, 1.0 );
 
     // Call the functions in an appropriate order
-    initProgram( vertCode, fragCode );
+    //initProgram( vertCode, fragCode );
+    initProgram( vert, frag );
     //initBuffers();
     initModels();
     initControls();
