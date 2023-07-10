@@ -10,6 +10,7 @@
   "dependencies": {
     "dat.gui": "^0.7.9",
     "gl-matrix": "^3.4.3",
+    "mjolnir.js": "^2.7.1",
     "three": "^0.145.0"
   },
   "devDependencies": {

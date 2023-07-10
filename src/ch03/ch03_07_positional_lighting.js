@@ -4,6 +4,8 @@ import utils from '../common/Utils.js';
 import * as glm from 'gl-matrix' ;
 import * as dat from 'dat.gui';
 
+import { EventManager } from 'mjolnir.js';
+
 import vert from '../shaders/ch03/ch03_07.vert';
 import frag from '../shaders/ch03/ch03_07.frag';
 
@@ -63,6 +65,32 @@ class App
         this.shininess = 200 ;
         this.distance = -100 ;
 
+        this.eventManager = new EventManager( this.canvas ) ;
+        // this.eventManager.on( 'pointerdown', ( e ) => {
+        //     console.log( e ) ;
+        // } );
+        // this.eventManager.on( 'pointerup', ( e ) => {
+        //     console.log( e ) ;
+        // } );
+        // this.eventManager.on( 'pointermove', ( e ) => {
+        //     console.log( e ) ;
+        // } );
+        // this.eventManager.on( 'pan', ( e ) => {
+        //     console.log( e ) ;
+        // } );
+        this.eventManager.on( 'panleft', ( e ) => {
+            if ( e.middleButton )
+            {
+                console.log( e ) ;
+            }
+        } );
+        this.eventManager.on( 'panright', ( e ) => {
+            if ( e.middleButton )
+            {
+                console.log( e ) ;
+            }
+        } );
+
     }
 
     /**
@@ -113,7 +141,7 @@ class App
         // Camera
         mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
 
-        //try
+        try
         {
             this.objects.forEach( object => {
                 
@@ -154,9 +182,9 @@ class App
 
             } ) ;
         }
-        //catch ( error )
+        catch ( error )
         {
-            //console.log( error ) ;
+            console.log( error ) ;
         }
 
     }
