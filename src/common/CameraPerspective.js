@@ -53,6 +53,14 @@ class CameraPerspective extends Transform
     setFieldOfView( fov )
     {
         this.fov = fov ;
+        this.needUpdateProjection = true ;
+        return this ;
+    }
+
+    setAspect( aspect )
+    {
+        this.aspect = aspect ;
+        this.needUpdateProjection = true ;
         return this ;
     }
 

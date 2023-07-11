@@ -87,12 +87,14 @@ class App
             if ( e.middleButton )
             {
                 console.log( e ) ;
+                this.camera.translateX( e.deltaX * -0.01 ) ;
             }
         } );
         this.eventManager.on( 'panright', ( e ) => {
             if ( e.middleButton )
             {
-                console.log( e ) ;
+                //console.log( e ) ;
+                this.camera.translateX( e.deltaX * -0.01 ) ;
             }
         } );
 
@@ -446,6 +448,8 @@ class App
     {
         this.canvas.width    = window.innerWidth ;
         this.canvas.height   = window.innerHeight * 0.9 ;
+
+        this.camera.setAspect( this.canvas.width / this.canvas.height ) ;
     }
 
     load()

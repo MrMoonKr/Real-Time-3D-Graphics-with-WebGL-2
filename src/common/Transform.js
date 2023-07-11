@@ -114,6 +114,8 @@ class Transform
         vec3.scale( _v1, _v1, distance ) ;
         vec3.add( this.position, this.position, _v1 ) ;
 
+        this.needUpdateTransform = true ;
+
         return this ;
     }
     translateX( distance )
