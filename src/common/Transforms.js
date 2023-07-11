@@ -46,7 +46,8 @@ class Transforms {
     }
 
     // Sets all matrix uniforms
-    setMatrixUniforms() {
+    setMatrixUniforms()
+    {
         this.calculateNormal();
         this.gl.uniformMatrix4fv( this.program.uModelViewMatrix, false, this.modelViewMatrix );
         this.gl.uniformMatrix4fv( this.program.uProjectionMatrix, false, this.projectionMatrix );
@@ -54,14 +55,16 @@ class Transforms {
     }
 
     // Pushes matrix onto the stack
-    push() {
+    push()
+    {
         const matrix = mat4.create();
         mat4.copy( matrix, this.modelViewMatrix );
         this.stack.push( matrix );
     }
 
     // Pops and returns matrix off the stack
-    pop() {
+    pop()
+    {
         return this.stack.length ?
             this.modelViewMatrix = this.stack.pop() :
             null;

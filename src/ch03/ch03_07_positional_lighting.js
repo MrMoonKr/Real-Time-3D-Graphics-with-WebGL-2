@@ -8,6 +8,7 @@ import { EventManager } from 'mjolnir.js';
 
 import vert from '../shaders/ch03/ch03_07.vert';
 import frag from '../shaders/ch03/ch03_07.frag';
+import CameraPerspective from '../common/CameraPerspective.js';
 
 /**
  * @type { HTMLCanvasElement } WebGL용 캔버스 요소
@@ -44,7 +45,7 @@ class App
         /**
          * @type { glm.mat4 } 카메라 월드행렬
          */
-        this.cameraMatrix       = glm.mat4.create();
+        this.viewMatrix         = glm.mat4.create();
         /**
          * @type { glm.mat4 } 카메라의 뷰행렬 * 오브젝트 월드행렬
          */
@@ -64,6 +65,10 @@ class App
         this.lightPosition = [ 4.5, 3, 15 ] ;
         this.shininess = 200 ;
         this.distance = -100 ;
+
+        this.camera = new CameraPerspective( this.canvas ) ;
+        this.camera.setPosition( 0.0, 50.0, 100.0 ) ;
+        this.camera.look( 0.0, 0.0, 0.0 ) ;
 
         this.eventManager = new EventManager( this.canvas ) ;
         // this.eventManager.on( 'pointerdown', ( e ) => {
@@ -123,10 +128,12 @@ class App
         if ( this.lastTime )
         {
             const elapsedTime = timeNow - this.lastTime ;
-            this.angle = ( 90 * elapsedTime ) / 10000.0 ;
+            this.angle += ( 45.0 * elapsedTime ) / 1000.0 ;
         }
 
         this.lastTime = timeNow ;
+
+        //console.log( '회전값 : ' + this.angle ) ;
     }
 
     draw()
@@ -139,16 +146,20 @@ class App
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
         // Camera
-        mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
+        //mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
+        this.projectionMatrix   = this.camera.getProjectionMatrix() ;
+        this.viewMatrix         = this.camera.getViewMatrix() ;
+
+        mat4.copy( this.modelViewMatrix, this.viewMatrix ) ;
 
         try
         {
             this.objects.forEach( object => {
                 
-                mat4.identity( this.modelViewMatrix ) ;
-                mat4.translate( this.modelViewMatrix, this.modelViewMatrix, [0, 0, this.distance] ) ;
-                mat4.rotate( this.modelViewMatrix, this.modelViewMatrix, 30 * Math.PI / 180, [1,0,0] ) ;
-                mat4.rotate( this.modelViewMatrix, this.modelViewMatrix, this.angle * Math.PI / 180, [0,1,0] ) ;
+                //mat4.identity( this.modelViewMatrix ) ;
+                //mat4.translate( this.modelViewMatrix, this.modelViewMatrix, [0, 0, this.distance] ) ;
+                //mat4.rotate( this.modelViewMatrix, this.modelViewMatrix, 30 * Math.PI / 180, [1,0,0] ) ;
+                //mat4.rotate( this.modelViewMatrix, this.modelViewMatrix, this.angle * Math.PI / 180, [0,1,0] ) ;
 
                 if ( object.alias === 'light' )
                 {

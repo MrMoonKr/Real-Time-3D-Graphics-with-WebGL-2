@@ -94,88 +94,95 @@ class Scene
         Object.assign( object, attributes );
 
         // Indices
-        object.ibo = gl.createBuffer();
-        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, object.ibo );
-        gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( object.indices ), gl.STATIC_DRAW );
+        object.ibo = gl.createBuffer() ;
+        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, object.ibo ) ;
+        gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( object.indices ), gl.STATIC_DRAW ) ;
 
-        // Attach a new VAO instance
-        object.vao = gl.createVertexArray();
+        object.vao = gl.createVertexArray() ; // Attach a new VAO instance
+        gl.bindVertexArray( object.vao ) ; // Enable it to start working on it
 
-        // Enable it to start working on it
-        gl.bindVertexArray( object.vao );
-
-        // Positions
-        if ( program.aVertexPosition >= 0 ) 
+        if ( program.aVertexPosition >= 0 ) // Positions
         {
-            const vertexBufferObject = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, vertexBufferObject );
-            gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( object.vertices ), gl.STATIC_DRAW );
-            gl.enableVertexAttribArray( program.aVertexPosition );
-            gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
+            const vertexBufferObject = gl.createBuffer() ;
+            gl.bindBuffer( gl.ARRAY_BUFFER, vertexBufferObject ) ;
+            gl.bufferData( gl.ARRAY_BUFFER, 
+                new Float32Array( object.vertices ),
+                gl.STATIC_DRAW 
+            ) ;
+            gl.enableVertexAttribArray( program.aVertexPosition ) ;
+            gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 ) ;
         }
 
-        // Normals
-        if ( program.aVertexNormal >= 0 ) 
+        if ( program.aVertexNormal >= 0 ) // Normals
         {
-            const normalBufferObject = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, normalBufferObject );
+            const normalBufferObject = gl.createBuffer() ;
+            gl.bindBuffer( gl.ARRAY_BUFFER, normalBufferObject ) ;
             gl.bufferData( gl.ARRAY_BUFFER, 
                 new Float32Array( utils.calculateNormals( object.vertices, object.indices ) ),
                 gl.STATIC_DRAW
-            );
-            gl.enableVertexAttribArray( program.aVertexNormal );
-            gl.vertexAttribPointer( program.aVertexNormal, 3, gl.FLOAT, false, 0, 0 );
+            ) ;
+            gl.enableVertexAttribArray( program.aVertexNormal ) ;
+            gl.vertexAttribPointer( program.aVertexNormal, 3, gl.FLOAT, false, 0, 0 ) ;
         }
 
-        // Color Scalars
-        if ( object.scalars && program.aVertexColor >= 0 ) 
+        if ( object.scalars && program.aVertexColor >= 0 ) // Color Scalars
         {
-            const colorBufferObject = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, colorBufferObject );
-            gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( object.scalars ), gl.STATIC_DRAW );
-            gl.enableVertexAttribArray( program.aVertexColor );
-            gl.vertexAttribPointer( program.aVertexColor, 4, gl.FLOAT, false, 0, 0 );
+            const colorBufferObject = gl.createBuffer() ;
+            gl.bindBuffer( gl.ARRAY_BUFFER, colorBufferObject ) ;
+            gl.bufferData( gl.ARRAY_BUFFER,
+                new Float32Array( object.scalars ),
+                gl.STATIC_DRAW 
+            ) ;
+            gl.enableVertexAttribArray( program.aVertexColor ) ;
+            gl.vertexAttribPointer( program.aVertexColor, 4, gl.FLOAT, false, 0, 0 ) ;
         }
 
         // Textures coordinates
         if ( object.textureCoords && program.aVertexTextureCoords >= 0 ) 
         {
-            const textureBufferObject = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, textureBufferObject );
-            gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( object.textureCoords ), gl.STATIC_DRAW );
-            gl.enableVertexAttribArray( program.aVertexTextureCoords );
-            gl.vertexAttribPointer( program.aVertexTextureCoords, 2, gl.FLOAT, false, 0, 0 );
+            const textureBufferObject = gl.createBuffer() ;
+            gl.bindBuffer( gl.ARRAY_BUFFER, textureBufferObject ) ;
+            gl.bufferData( gl.ARRAY_BUFFER, 
+                new Float32Array( object.textureCoords ), 
+                gl.STATIC_DRAW 
+            ) ;
+            gl.enableVertexAttribArray( program.aVertexTextureCoords ) ;
+            gl.vertexAttribPointer( program.aVertexTextureCoords, 2, gl.FLOAT, false, 0, 0 ) ;
 
             // Tangents
             if ( program.aVertexTangent >= 0 ) 
             {
-                const tangentBufferObject = gl.createBuffer();
-                gl.bindBuffer( gl.ARRAY_BUFFER, tangentBufferObject );
+                const tangentBufferObject = gl.createBuffer() ;
+                gl.bindBuffer( gl.ARRAY_BUFFER, tangentBufferObject ) ;
                 gl.bufferData( gl.ARRAY_BUFFER, 
                     new Float32Array( utils.calculateTangents( object.vertices, object.textureCoords, object.indices ) ),
                     gl.STATIC_DRAW
-                );
-                gl.enableVertexAttribArray( program.aVertexTangent );
-                gl.vertexAttribPointer( program.aVertexTangent, 3, gl.FLOAT, false, 0, 0 );
+                ) ;
+                gl.enableVertexAttribArray( program.aVertexTangent ) ;
+                gl.vertexAttribPointer( program.aVertexTangent, 3, gl.FLOAT, false, 0, 0 ) ;
             }
         }
 
         // Image texture
         if ( object.image ) 
         {
-            object.texture = new Texture( gl, object.image );
+            object.texture = new Texture( gl, object.image ) ;
         }
 
         // Push to our objects list for later access
-        this.objects.push( object );
+        this.objects.push( object ) ;
 
         // Clean up
-        gl.bindVertexArray( null );
-        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
-        gl.bindBuffer( gl.ARRAY_BUFFER, null );
+        gl.bindVertexArray( null ) ;
+        gl.bindBuffer( gl.ARRAY_BUFFER, null ) ;
+        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null ) ;
     }
 
     // Traverses over every item in the scene
+    /**
+     * 
+     * @param {Function} cb 
+     */
     traverse( cb ) 
     {
         for ( let i = 0 ; i < this.objects.length ; i++ ) 
@@ -241,7 +248,8 @@ class Scene
     }
 
     // Construct and print a string representing the render order (useful for debugging)
-    printRenderOrder() {
+    printRenderOrder()
+    {
         const renderOrder = this.objects.map( object => object.alias ).join( ' > ' );
         console.info( 'Render Order:', renderOrder );
     }
@@ -249,4 +257,4 @@ class Scene
 }
 
 
-export default Scene;
+export default Scene ;
