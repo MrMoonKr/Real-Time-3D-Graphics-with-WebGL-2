@@ -9,6 +9,7 @@ import { EventManager } from 'mjolnir.js';
 import vert from '../shaders/ch03/ch03_07.vert';
 import frag from '../shaders/ch03/ch03_07.frag';
 import CameraPerspective from '../common/CameraPerspective.js';
+import OrbitController from '../common/OrbitController.js';
 
 /**
  * @type { HTMLCanvasElement } WebGL용 캔버스 요소
@@ -70,7 +71,9 @@ class App
         this.camera.setPosition( 0.0, 50.0, 100.0 ) ;
         this.camera.look( 0.0, 0.0, 0.0 ) ;
 
-        this.eventManager = new EventManager( this.canvas ) ;
+        this.controller = new OrbitController( this.camera, this.canvas ) ;
+
+        //this.eventManager = new EventManager( this.canvas ) ;
         // this.eventManager.on( 'pointerdown', ( e ) => {
         //     console.log( e ) ;
         // } );
@@ -83,20 +86,20 @@ class App
         // this.eventManager.on( 'pan', ( e ) => {
         //     console.log( e ) ;
         // } );
-        this.eventManager.on( 'panleft', ( e ) => {
-            if ( e.middleButton )
-            {
-                console.log( e ) ;
-                this.camera.translateX( e.deltaX * -0.01 ) ;
-            }
-        } );
-        this.eventManager.on( 'panright', ( e ) => {
-            if ( e.middleButton )
-            {
-                //console.log( e ) ;
-                this.camera.translateX( e.deltaX * -0.01 ) ;
-            }
-        } );
+        // this.eventManager.on( 'panleft', ( e ) => {
+        //     if ( e.middleButton )
+        //     {
+        //         console.log( e ) ;
+        //         this.camera.translateX( e.deltaX * -0.01 ) ;
+        //     }
+        // } );
+        // this.eventManager.on( 'panright', ( e ) => {
+        //     if ( e.middleButton )
+        //     {
+        //         //console.log( e ) ;
+        //         this.camera.translateX( e.deltaX * -0.01 ) ;
+        //     }
+        // } );
 
     }
 
@@ -136,6 +139,8 @@ class App
         this.lastTime = timeNow ;
 
         //console.log( '회전값 : ' + this.angle ) ;
+
+        this.controller.update() ;
     }
 
     draw()
