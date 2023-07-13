@@ -69,7 +69,9 @@ class App
 
         this.camera = new CameraPerspective( this.canvas ) ;
         this.camera.setPosition( 0.0, 50.0, 100.0 ) ;
-        this.camera.look( 0.0, 0.0, 0.0 ) ;
+        this.camera.look( glm.vec3.fromValues( 0, 0, 0 ) ) ;
+
+        //console.log( 'camera at : ' + this.camera.position.toString() ) ;
 
         this.controller = new OrbitController( this.camera, this.canvas ) ;
 
@@ -153,7 +155,7 @@ class App
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
         // Camera
-        //mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
+
         this.projectionMatrix   = this.camera.getProjectionMatrix() ;
         this.viewMatrix         = this.camera.getViewMatrix() ;
 

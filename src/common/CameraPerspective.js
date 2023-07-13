@@ -26,19 +26,14 @@ class CameraPerspective extends Transform
         this.near                       = 0.1 ;
         this.far                        = 1000.0 ;
 
-        this.setPosition( 0.0, 0.0, 5.0 ) ;
+        this.setPosition( 0.0, 0.0, 100.0 ) ;
 
-        this.needUpdateProjection       = true ;
     }
 
 
     getProjectionMatrix()
     {
-        if ( this.needUpdateProjection )
-        {
-            mat4.perspective( this.projectionMatrix, this.fov, this.aspect, this.near, this.far ) ;
-        }
-
+        this.updateProjectionMatrix() ;
         return this.projectionMatrix ;
     }
 
@@ -53,15 +48,22 @@ class CameraPerspective extends Transform
     setFieldOfView( fov )
     {
         this.fov = fov ;
-        this.needUpdateProjection = true ;
+        this.updateProjectionMatrix() ;
+
         return this ;
     }
 
     setAspect( aspect )
     {
         this.aspect = aspect ;
-        this.needUpdateProjection = true ;
+        this.updateProjectionMatrix() ;
+
         return this ;
+    }
+
+    updateProjectionMatrix()
+    {
+        mat4.perspective( this.projectionMatrix, this.fov, this.aspect, this.near, this.far ) ;
     }
 
 }

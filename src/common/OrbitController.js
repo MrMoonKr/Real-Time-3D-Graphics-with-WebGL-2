@@ -1,6 +1,7 @@
 import { mat4, quat, vec2, vec3 } from "gl-matrix";
 import Transform from "./Transform";
-import { quatFromVec3 } from "./gl-matrix-extensions";
+import { quatFromVec3, sphericalFromVec3, vec3FromSpherical } from "./gl-matrix-extensions";
+import Spherical from "./Spherical";
 
 
 
@@ -21,8 +22,8 @@ const STATE = {
 const EPS = 0.000001;
 
 // current position in spherical coordinates
-//const spherical     = new Spherical() ;
-//const sphericalDelta = new Spherical() ;
+const spherical     = new Spherical() ;
+const sphericalDelta = new Spherical() ;
 
 let scale           = 1 ;
 const panOffset     = vec3.create() ; // new Vector3();
@@ -58,21 +59,25 @@ class OrbitController
         if ( domElement === document ) console.error( 'OrbitController : "document" should not be used as the target "domElement". Please use "canvas" instead.' );
 
         /**
-         * @type {Transform}
+         * @type {Transform} 움직이고자 하는 오브젝트
          */
         this.object         = object ;
         /**
-         * @type {HTMLElement}
+         * @type {HTMLElement} 이벤트를 전달받을 HTML 요소
          */
         this.domElement     = domElement ;
-
-        this.enabled = true ;
-
-        this.target = vec3.create() ;
+        /** 
+         * @type {boolean} 활성화 여부
+         */
+        this.enabled        = true ;
+        /**
+         * @type {vec3} 위성같은 움직임의 중심점
+         */
+        this.target         = vec3.create() ;
 
         // How far you can dolly in and out ( PerspectiveCamera only )
-        this.minDistance = 0;
-        this.maxDistance = Infinity;
+        this.minDistance    = 0;
+        this.maxDistance    = Infinity;
 
         // How far you can zoom in and out ( OrthographicCamera only )
         this.minZoom = 0;
@@ -164,7 +169,7 @@ class OrbitController
 
         
 
-        this.domElement.onpointerdown = event => this.onPointerDown( event ) ;
+        //this.domElement.onpointerdown = event => this.onPointerDown( event ) ;
         //
 
         //scope.domElement.addEventListener( 'contextmenu', this.onContextMenu ) ;
@@ -178,23 +183,199 @@ class OrbitController
 
         // force an update at start
 
-        this.update();
+        //this.update();
 
 
     }
 
 
+    test01()
+    {
+        // 회전 테스트
+        //this.object.rotateX( 2 ) ;
+        //this.object.rotateY( 2 ) ;
+        //this.object.rotateZ( 2 ) ;
+
+        // 바라보기 테스트
+        //vec3.add( this.target, this.target, vec3.fromValues( 0.1, 0.0, 0.0 ) ); // just test
+        //this.object.look( this.target ) ;
+
+        // 중심회전 테스트
+        const offset = vec3.create() ;
+        vec3.sub( offset, this.object.position, this.target ) ;
+
+        const spherical = sphericalFromVec3( offset ) ;
+        spherical.theta += 1 * Math.PI / 180 ;
+
+        const newoffset = vec3FromSpherical( spherical ) ;
+
+        this.object.setPosition( newoffset[0], newoffset[1], newoffset[2] ) ;
+        this.object.look( this.target ) ;
+    }
 
     update()
     {
-        
-        const offset            = vec3.create() ; // new Vector3();
-        //const quat              = quatFromVec3( this.object.up, vec3.create( 0, 1, 0 ) ) ; // new Quaternion().setFromUnitVectors( object.up, new Vector3( 0, 1, 0 ) );
-        //const quatInverse       = quat.clone().invert() ;
+        this.test01() ;
+
+        return ;
+
+
+        const up                = vec3.fromValues( this.object.transformMatrix[4], this.object.transformMatrix[5], this.object.transformMatrix[6] );
+        const rot               = quatFromVec3( up, vec3.create( 0, 1, 0 ) ) ; // new Quaternion().setFromUnitVectors( object.up, new Vector3( 0, 1, 0 ) );
+        const rotInverse        = quat.create() ;
+        quat.invert( rotInverse, rot ) ;
         const lastPosition      = vec3.create() ;
         const lastQuaternion    = quat.create() ;
         const twoPI             = 2 * Math.PI ;
+        
+        
+        // 
+        
+        const position          = vec3.create() ;
+        const offset            = vec3.create() ;
 
+        vec3.copy( position, this.object.position ) ;
+        vec3.sub( offset, position, this.target ) ;
+
+        // rotate offset to "y-axis-is-up" space
+        //offset.applyQuaternion( rot );
+        //vec3.transformQuat( offset, offset, rot ) ;
+
+        // angle from z-axis around y-axis
+        spherical.setFromVector3( offset );
+
+        // if ( this.autoRotate && this.state === STATE.NONE )
+        // {
+        //     this.rotateLeft( this.getAutoRotationAngle() );
+        // }
+
+        if ( this.enableDamping )
+        {
+            spherical.theta += sphericalDelta.theta * this.dampingFactor ;
+            spherical.phi   += sphericalDelta.phi   * this.dampingFactor ;
+
+        }
+        else
+        {
+            spherical.theta += sphericalDelta.theta ;
+            spherical.phi   += sphericalDelta.phi ;
+        }
+
+        // restrict theta to be between desired limits
+
+        let min = this.minAzimuthAngle ;
+        let max = this.maxAzimuthAngle ;
+
+        if ( isFinite( min ) && isFinite( max ) )
+        {
+            if ( min < - Math.PI ) min += twoPI ; else if ( min > Math.PI ) min -= twoPI ;
+            if ( max < - Math.PI ) max += twoPI ; else if ( max > Math.PI ) max -= twoPI ;
+
+            if ( min <= max )
+            {
+                spherical.theta = Math.max( min, Math.min( max, spherical.theta ) ) ;
+
+            }
+            else
+            {
+                spherical.theta = ( spherical.theta > ( min + max ) / 2 ) ?
+                    Math.max( min, spherical.theta ) :
+                    Math.min( max, spherical.theta ) ;
+            }
+        }
+
+        // restrict phi to be between desired limits
+        spherical.phi = Math.max( this.minPolarAngle, Math.min( this.maxPolarAngle, spherical.phi ) ) ;
+
+        spherical.makeSafe() ;
+
+        spherical.radius *= scale ;
+
+        // restrict radius to be between desired limits
+        spherical.radius = Math.max( this.minDistance, Math.min( this.maxDistance, spherical.radius ) ) ;
+
+        //return;
+
+        // move target to panned location
+
+        // if ( this.enableDamping === true )
+        // {
+        //     //this.target.addScaledVector( panOffset, this.dampingFactor ) ;
+        //     vec3.scale( panOffset, panOffset, this.dampingFactor ) ;
+        //     vec3.scale( this.target, this.target, panOffset ) ;
+        // } 
+        // else 
+        // {
+        //     //this.target.add( panOffset );
+        //     vec3.add( this.target, this.target, panOffset ) ;
+        // }
+
+        //return;
+
+        //offset.setFromSpherical( spherical ) ;
+        //offset = vec3FromSpherical( spherical ) ;
+
+        spherical.radius += 10.0 ;
+        const temp = vec3FromSpherical( spherical ) ;
+        console.log( 'temp : ' + temp.toString() ) ;
+        vec3.copy( offset, offset, temp ) ;
+
+
+        // rotate offset back to "camera-up-vector-is-up" space
+        //offset.applyQuaternion( quatInverse ) ;
+        //vec3.transformQuat( offset, offset, rotInverse ) ;
+
+        //position.copy( this.target ).add( offset );
+
+        //vec3.add( position, this.target, offset ) ;
+
+
+
+        //vec3.add( this.target, this.target, vec3.fromValues( 0.1, 0.0, 0.0 ) ); // just test
+        this.object.look( this.target ) ;
+
+        //console.log( 'offset :'  + offset.toString() ) ;
+        //console.log( 'spherical start :'  + spherical.toString() ) ;
+        //console.log( 'spherical delta : ' + sphericalDelta.toString() ) ;
+        //console.log( 'object at ' + this.object.position.toString() ) ;
+        //console.log( 'object look at ' + this.target.toString() ) ;
+
+        // if ( this.enableDamping === true )
+        // {
+        //     sphericalDelta.theta *= ( 1 - this.dampingFactor ) ;
+        //     sphericalDelta.phi   *= ( 1 - this.dampingFactor ) ;
+
+        //     panOffset.multiplyScalar( 1 - this.dampingFactor ) ;
+        // } 
+        // else
+        // {
+        //     sphericalDelta.set( 0, 0, 0 ) ;
+
+        //     panOffset.set( 0, 0, 0 ) ;
+        // }
+
+        scale = 1 ;
+
+        // update condition is:
+        // min( camera displacement, camera rotation in radians ) ^ 2 > EPS
+        // using small-angle approximation cos(x/2) = 1 - x^2 / 8
+
+        if ( zoomChanged //||
+            // lastPosition.distanceToSquared( this.object.position ) > EPS ||
+            // 8 * ( 1 - lastQuaternion.dot( this.object.rotation ) ) > EPS 
+            )
+        {
+
+            //this.dispatchEvent( _changeEvent );
+
+            //lastPosition.copy( this.object.position ) ;
+            //lastQuaternion.copy( this.object.rotation ) ;
+            zoomChanged = false;
+
+            return true ;
+        }
+
+        return false ;
     }
 
 
@@ -208,7 +389,7 @@ class OrbitController
      */
     handleMouseDownRotate( event ) 
     {
-        console.log( 'handleMouseDownRotate() 호출됨' ) ;
+        console.log( 'handleMouseDownRotate() 호출됨 : ' + rotateStart.toString() ) ;
         //rotateStart.set( event.clientX, event.clientY );
         vec2.set( rotateStart, event.clientX, event.clientY ) ;
     }
@@ -235,25 +416,25 @@ class OrbitController
      */
     handleMouseMoveRotate( event )
     {
-        console.log( 'handleMouseMoveRotate() 호출됨' ) ;
-        //return ;
-
+        
         //rotateEnd.set( event.clientX, event.clientY );
         vec2.set( rotateEnd, event.clientX, event.clientY ) ;
-
+        
         //rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( this.rotateSpeed );
         vec2.sub( rotateDelta, rotateEnd, rotateStart ) ;
         vec2.scale( rotateDelta, rotateDelta, this.rotateSpeed ) ;
-
+        
         const element = this.domElement ;
-
-        this.rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ) ; // yes, height
-        this.rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight ) ;
-
+        
+        this.rotateLeft( 200 * Math.PI * rotateDelta[0] / element.clientHeight ) ; // yes, height
+        this.rotateUp( 200 * Math.PI * rotateDelta[1] / element.clientHeight ) ;
+        
         //rotateStart.copy( rotateEnd );
         vec2.copy( rotateStart, rotateEnd ) ;
-
+        
         this.update() ;
+
+        console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
     }
 
     handleMouseMoveDolly( event ) {
@@ -920,9 +1101,9 @@ class OrbitController
 
 
 
-    getAutoRotationAngle() 
+    getAutoRotationAngle()
     {
-        return 2 * Math.PI / 60 / 60 * this.autoRotateSpeed;
+        return 2 * Math.PI / 60 / 60 * this.autoRotateSpeed ;
     }
 
     getZoomScale() {
@@ -931,16 +1112,16 @@ class OrbitController
 
     }
 
-    rotateLeft( angle ) {
-
-        //sphericalDelta.theta -= angle;
-
+    rotateLeft( angle )
+    {
+        console.log( 'rotateLeft() : ' + angle ) ;
+        sphericalDelta.theta -= angle;
     }
 
-    rotateUp( angle ) {
-
-        //sphericalDelta.phi -= angle;
-
+    rotateUp( angle )
+    {
+        console.log( 'rotateUp() : ' + angle ) ;
+        sphericalDelta.phi -= angle;
     }
 
 
@@ -956,6 +1137,8 @@ class OrbitController
         vec3.scale( v, v, distance ) ;
 
         vec3.add( panOffset, panOffset, v ) ;
+
+        console.log( 'panLeft()' + panOffset.toString() ) ;
     }
 
     /**
@@ -980,6 +1163,8 @@ class OrbitController
         vec3.scale( v, v, distance ) ;
 
         vec3.add( panOffset, panOffset, v ) ;
+
+        console.log( 'panUp()' + panOffset.toString() ) ;
     }
 
     /**
