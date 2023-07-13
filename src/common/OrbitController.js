@@ -206,6 +206,8 @@ class OrbitController
 
         const spherical = sphericalFromVec3( offset ) ;
         spherical.theta += 1 * Math.PI / 180 ;
+        //spherical.phi -= 1 * Math.PI / 180 ;
+        if ( spherical.phi <= 0 ) spherical.phi = Math.PI ;
 
         const newoffset = vec3FromSpherical( spherical ) ;
 
