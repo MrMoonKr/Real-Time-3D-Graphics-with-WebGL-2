@@ -22,8 +22,8 @@ const STATE = {
 const EPS = 0.000001;
 
 // current position in spherical coordinates
-const spherical     = new Spherical() ;
-const sphericalDelta = new Spherical() ;
+let spherical     = new Spherical() ;
+let sphericalDelta = new Spherical() ;
 
 let scale           = 1 ;
 const panOffset     = vec3.create() ; // new Vector3();
@@ -169,7 +169,7 @@ class OrbitController
 
         
 
-        //this.domElement.onpointerdown = event => this.onPointerDown( event ) ;
+        this.domElement.onpointerdown = event => this.onPointerDown( event ) ;
         //
 
         //scope.domElement.addEventListener( 'contextmenu', this.onContextMenu ) ;
@@ -217,7 +217,7 @@ class OrbitController
 
     update()
     {
-        this.test01() ;
+        //this.test01() ;
 
         return ;
 
@@ -392,14 +392,51 @@ class OrbitController
     handleMouseDownRotate( event ) 
     {
         console.log( 'handleMouseDownRotate() 호출됨 : ' + rotateStart.toString() ) ;
-        //rotateStart.set( event.clientX, event.clientY );
+
         vec2.set( rotateStart, event.clientX, event.clientY ) ;
+
+        const offset = vec3.create() ;
+        vec3.sub( offset, this.object.position, this.target ) ;
+
+        spherical       = sphericalFromVec3( offset ) ;
+        sphericalDelta  = sphericalFromVec3( offset ) ;
     }
+    /**
+     * 
+     * @param {PointerEvent} event 
+     */
+    handleMouseMoveRotate( event )
+    {
+        vec2.set( rotateEnd, event.clientX, event.clientY ) ;
 
-    handleMouseDownDolly( event ) {
+        vec2.sub( rotateDelta, rotateEnd, rotateStart ) ;
+        vec2.scale( rotateDelta, rotateDelta, this.rotateSpeed ) ;
+        
+        const element = this.domElement ;
 
-        dollyStart.set( event.clientX, event.clientY );
+        //console.log( '회전 델타 : ' + rotateDelta[0] ) ;
+        const deltaX =  1 * ( Math.PI / 180 ) * rotateDelta[0] ;
+        const deltaY =  1 * ( Math.PI / 180 ) * rotateDelta[1] ;
 
+        sphericalDelta.theta += deltaX ;
+        sphericalDelta.phi   += deltaY ;
+        
+        //this.rotateLeft( 200 * Math.PI * rotateDelta[0] / element.clientHeight ) ; // yes, height
+        //this.rotateUp( 200 * Math.PI * rotateDelta[1] / element.clientHeight ) ;
+
+        const newoffset = vec3FromSpherical( sphericalDelta ) ;
+        //console.log( '옵셋 : ' + newoffset ) ;
+
+        this.object.setPosition( newoffset[0], newoffset[1], newoffset[2] ) ;
+        this.object.look( this.target ) ;
+        
+        //rotateStart.copy( rotateEnd );
+        vec2.copy( rotateStart, rotateEnd ) ;
+        
+        //this.update() ;
+
+        //console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
+        console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
     }
 
     /**
@@ -408,38 +445,75 @@ class OrbitController
      */
     handleMouseDownPan( event )
     {
-        //panStart.set( event.clientX, event.clientY );
+        console.log( 'handleMouseDownPan() 호출됨 : ' ) ;
         vec2.set( panStart, event.clientX, event.clientY ) ;
-    }
 
+    }
     /**
      * 
      * @param {PointerEvent} event 
      */
-    handleMouseMoveRotate( event )
+    handleMouseMovePan( event )
     {
         
-        //rotateEnd.set( event.clientX, event.clientY );
-        vec2.set( rotateEnd, event.clientX, event.clientY ) ;
-        
-        //rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( this.rotateSpeed );
-        vec2.sub( rotateDelta, rotateEnd, rotateStart ) ;
-        vec2.scale( rotateDelta, rotateDelta, this.rotateSpeed ) ;
-        
-        const element = this.domElement ;
-        
-        this.rotateLeft( 200 * Math.PI * rotateDelta[0] / element.clientHeight ) ; // yes, height
-        this.rotateUp( 200 * Math.PI * rotateDelta[1] / element.clientHeight ) ;
-        
-        //rotateStart.copy( rotateEnd );
-        vec2.copy( rotateStart, rotateEnd ) ;
-        
-        this.update() ;
+        vec2.set( panEnd, event.clientX, event.clientY ) ;
 
-        console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
+        vec2.sub( panDelta, panEnd, panStart ) ;
+        vec2.scale( panDelta, panDelta, this.panSpeed ) ;
+
+        const offset = vec3.create() ;
+        vec3.sub( offset, this.object.position, this.target ) ;
+
+        let targetDistance = vec3.length( offset ) ;
+
+        const panOffset = vec3.create() ;
+        vec3.add( panOffset, panOffset, vec3.fromValues( 1 * panDelta[0], 1 * panDelta[1], 0 ) ) ;
+
+        console.log( 'panOffset : ' + panOffset.toString() ) ;
+
+        const newPos = vec3.create() ;
+        vec3.add( newPos, this.object.position, panOffset ) ;
+
+        this.object.setPosition( newPos[0], newPos[1], newPos[2] ) ;
+
+        vec3.add( this.target, this.target, panOffset ) ;
+
+        //this.pan( panDelta.x, panDelta.y );
+        //this.pan( panDelta[0], panDelta[1] ) ;
+
+        //panStart.copy( panEnd );
+        vec2.copy( panStart, panEnd ) ;
+
+        //this.update();
+
+        console.log( 'handleMouseMovePan() 호출됨 : ' ) ;
     }
 
-    handleMouseMoveDolly( event ) {
+
+    
+    /**
+     * 
+     * @param {PointerEvent} event 
+     */
+    handleMouseUp( event )
+    {
+        console.log( 'handleMouseUp() : ' + event.type ) ;
+    }
+
+
+
+    handleMouseDownDolly( event ) 
+    {
+
+        dollyStart.set( event.clientX, event.clientY );
+
+    }
+
+
+    
+
+    handleMouseMoveDolly( event )
+    {
 
         dollyEnd.set( event.clientX, event.clientY );
 
@@ -461,32 +535,8 @@ class OrbitController
 
     }
 
-    /**
-     * 
-     * @param {PointerEvent} event 
-     */
-    handleMouseMovePan( event )
-    {
-        //panEnd.set( event.clientX, event.clientY );
-        vec2.set( panEnd, event.clientX, event.clientY ) ;
 
-        //panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
-        vec2.sub( panDelta, panEnd, panStart ) ;
-        vec2.scale( panDelta, panDelta, this.panSpeed ) ;
 
-        //this.pan( panDelta.x, panDelta.y );
-        this.pan( panDelta[0], panDelta[1] ) ;
-
-        //panStart.copy( panEnd );
-        vec2.copy( panStart, panEnd ) ;
-
-        this.update();
-    }
-
-    handleMouseUp( /*event*/ )
-    {
-        // no-op
-    }
 
     handleMouseWheel( event ) {
 
@@ -881,7 +931,7 @@ class OrbitController
 
                 if ( this.enablePan === false ) return ;
 
-                //this.handleMouseMovePan( event ) ;
+                this.handleMouseMovePan( event ) ;
 
                 break;
 
@@ -896,13 +946,12 @@ class OrbitController
     {
         this.domElement.ownerDocument.onpointermove = event => { } ;
         this.domElement.ownerDocument.onpointerup   = event => { } ;
-
         //this.domElement.ownerDocument.removeEventListener( 'pointermove', this.onPointerMove ) ;
         //this.domElement.ownerDocument.removeEventListener( 'pointerup', this.onPointerUp ) ;
 
         if ( this.enabled === false ) return ;
 
-        //handleMouseUp( event );
+        this.handleMouseUp( event );
 
         //scope.dispatchEvent( _endEvent );
 
