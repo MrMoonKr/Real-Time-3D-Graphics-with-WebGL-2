@@ -418,8 +418,10 @@ class OrbitController
         const deltaX =  1 * ( Math.PI / 180 ) * rotateDelta[0] ;
         const deltaY =  1 * ( Math.PI / 180 ) * rotateDelta[1] ;
 
-        sphericalDelta.theta += deltaX ;
-        sphericalDelta.phi   += deltaY ;
+        sphericalDelta.theta -= deltaX ;
+        sphericalDelta.phi   -= deltaY ;
+        sphericalDelta.phi    = this._clampPHI( sphericalDelta.phi ) ;
+        
         
         //this.rotateLeft( 200 * Math.PI * rotateDelta[0] / element.clientHeight ) ; // yes, height
         //this.rotateUp( 200 * Math.PI * rotateDelta[1] / element.clientHeight ) ;
@@ -436,7 +438,7 @@ class OrbitController
         //this.update() ;
 
         //console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
-        console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
+        //console.log( 'handleMouseMoveRotate() 호출됨 : ' + rotateDelta.toString() + ' : ' + rotateEnd.toString() ) ;
     }
 
     /**
@@ -810,8 +812,7 @@ class OrbitController
      */
     onMouseDown( event )
     {
-        // Prevent the browser from scrolling.
-        event.preventDefault();
+        event.preventDefault() ; // 기본 동작 막음. Prevent the browser from scrolling.
 
         // Manually set the focus since calling preventDefault above
         // prevents the browser from setting it automatically.
@@ -1262,7 +1263,15 @@ class OrbitController
         // }
     }
 
+    _clampPHI( phi )
+    {
+        return this._clamp( phi, 0 , Math.PI ) ;
+    }
 
+    _clamp( value, min, max )
+    {
+        return Math.min( Math.max( value, min ), max ) ;
+    }
 }
 
 

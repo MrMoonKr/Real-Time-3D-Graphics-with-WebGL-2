@@ -2,8 +2,8 @@
   "name": "real-time-3d-graphics-with-webgl-2",
   "version": "1.0.0",
   "scripts": {
-    "clean": "rimraf dist",
-    "build": "rimraf dist && webpack build",
+    "clean": "rimraf ./public",
+    "build": "rimraf ./public && webpack build",
     "build.dev": "webpack build",
     "build.dev.watch": "webpack build --watch"
   },

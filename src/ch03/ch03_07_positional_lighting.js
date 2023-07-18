@@ -1,15 +1,13 @@
 'use strict';
 
-import utils from '../common/Utils.js';
-import * as glm from 'gl-matrix' ;
-import * as dat from 'dat.gui';
+import utils                from '../common/Utils.js';
+import * as glm             from 'gl-matrix' ;
+import * as dat             from 'dat.gui';
 
-import { EventManager } from 'mjolnir.js';
-
-import vert from '../shaders/ch03/ch03_07.vert';
-import frag from '../shaders/ch03/ch03_07.frag';
-import CameraPerspective from '../common/CameraPerspective.js';
-import OrbitController from '../common/OrbitController.js';
+import vert                 from '../shaders/ch03/ch03_07.vert' ;
+import frag                 from '../shaders/ch03/ch03_07.frag' ;
+import CameraPerspective    from '../common/CameraPerspective.js' ;
+import OrbitController      from '../common/OrbitController.js' ;
 
 /**
  * @type { HTMLCanvasElement } WebGL용 캔버스 요소
@@ -23,7 +21,7 @@ let app = null ;
 
 class App 
 {
-
+    
     /**
      * 
      * @param {HTMLCanvasElement} canvasElement WebGL용 캔버스 요소
@@ -71,38 +69,7 @@ class App
         this.camera.setPosition( 0.0, 50.0, 100.0 ) ;
         this.camera.look( glm.vec3.fromValues( 0, 0, 0 ) ) ;
 
-        //console.log( 'camera at : ' + this.camera.position.toString() ) ;
-
         this.controller = new OrbitController( this.camera, this.canvas ) ;
-
-        //this.eventManager = new EventManager( this.canvas ) ;
-        // this.eventManager.on( 'pointerdown', ( e ) => {
-        //     console.log( e ) ;
-        // } );
-        // this.eventManager.on( 'pointerup', ( e ) => {
-        //     console.log( e ) ;
-        // } );
-        // this.eventManager.on( 'pointermove', ( e ) => {
-        //     console.log( e ) ;
-        // } );
-        // this.eventManager.on( 'pan', ( e ) => {
-        //     console.log( e ) ;
-        // } );
-        // this.eventManager.on( 'panleft', ( e ) => {
-        //     if ( e.middleButton )
-        //     {
-        //         console.log( e ) ;
-        //         this.camera.translateX( e.deltaX * -0.01 ) ;
-        //     }
-        // } );
-        // this.eventManager.on( 'panright', ( e ) => {
-        //     if ( e.middleButton )
-        //     {
-        //         //console.log( e ) ;
-        //         this.camera.translateX( e.deltaX * -0.01 ) ;
-        //     }
-        // } );
-
     }
 
     /**
@@ -118,14 +85,8 @@ class App
         this.gl.enable( this.gl.DEPTH_TEST );
 
         this.initProgram( this.gl, vertCode, fragCode );
-
         this.initLights( this.gl ) ;
-
         this.load() ;
-
-        //this.initBuffers();
-
-        //this.initControls();
 
     }
 
@@ -142,7 +103,7 @@ class App
 
         //console.log( '회전값 : ' + this.angle ) ;
 
-        this.controller.update() ;
+        //this.controller.update() ;
     }
 
     draw()

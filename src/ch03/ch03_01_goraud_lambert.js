@@ -1,7 +1,7 @@
 'use strict';
 
 import utils from '../common/Utils.js';
-import * as glm from 'gl-matrix' ;
+import { mat4, vec3 } from 'gl-matrix' ;
 import * as dat from 'dat.gui';
 
 /**
@@ -17,63 +17,66 @@ let app = null ;
 /**
  * @type { string } 정점셰이더
  */
-const vertCode = 
-`#version 300 es
-#pragma vscode_glsllint_stage: vert
+const vertCode = /*glsl*/ `#version 300 es
+    #pragma vscode_glsllint_stage: vert
 
-precision mediump float;
+    precision mediump float;
 
-uniform mat4    uModelViewMatrix;
-uniform mat4    uProjectionMatrix;
-uniform mat4    uNormalMatrix;
-uniform vec3    uLightDirection;
-uniform vec3    uLightDiffuse;
-uniform vec3    uMaterialDiffuse;
+    uniform mat4    uWorldMatrix ;
+    uniform mat4    uNormalMatrix ;
+    uniform mat4    uModelViewMatrix ;
+    uniform mat4    uViewMatrix ;
+    uniform mat4    uProjectionMatrix ;
+    uniform vec3    uLightDirection ;
+    uniform vec3    uLightDiffuse ;
+    uniform vec3    uMaterialDiffuse ;
 
-in vec3         aVertexPosition;
-in vec3         aVertexNormal;
+    in vec3         aVertexPosition ;
+    in vec3         aVertexNormal ;
 
-out vec4        vVertexColor;
+    out vec4        vVertexColor ;
 
-void main( void ) 
-{
-    // Calculate the normal vector
-    vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
+    void main( void ) 
+    {
+        // Calculate the normal vector
+        vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
 
-    // Normalized light direction
-    vec3 L      = normalize( uLightDirection ) ;
+        // Normalized light direction
+        vec3 L      = normalize( uLightDirection ) ;
 
-    // Dot product of the normal product and negative light direction vector
-    float lambertTerm = dot( N, -L ) ;
+        // Dot product of the normal product and negative light direction vector
+        float lambertTerm = dot( N, -L ) ;
 
-    // Calculating the diffuse color based on the Lambertian reflection model
-    vec3 Id     = uMaterialDiffuse * uLightDiffuse * lambertTerm ;
+        // Calculating the diffuse color based on the Lambertian reflection model
+        vec3 Id     = uMaterialDiffuse * uLightDiffuse * lambertTerm ;
 
-    // Set the varying to be used inside of the fragment shader
-    vVertexColor = vec4( Id, 1.0 );
+        // Set the varying to be used inside of the fragment shader
+        vVertexColor = vec4( Id, 1.0 ) ;
 
-    // Setting the vertex position
-    gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
+        // Setting the vertex position
+        //gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
+        gl_Position = uProjectionMatrix * uViewMatrix * uWorldMatrix * vec4( aVertexPosition, 1.0 ) ;
 
-}`;
+    }
+`;
 
-const fragCode =
-`#version 300 es
-#pragma vscode_glsllint_stage: frag
+const fragCode = /*glsl*/ `#version 300 es
+    #pragma vscode_glsllint_stage: frag
 
-precision mediump float;
+    precision mediump float;
 
-// Expect the interpolated value from the vertex shader
-in vec4 vVertexColor;
+    // Expect the interpolated value from the vertex shader
+    in vec4 vVertexColor;
 
-// Return the final color as fragColor
-out vec4 fragColor;
+    // Return the final color as fragColor
+    out vec4 fragColor;
 
-void main( void )
-{
-    // Simply set the value passed in from the vertex shader
-    fragColor = vVertexColor;
-}`;
+    void main( void )
+    {
+        // Simply set the value passed in from the vertex shader
+        fragColor = vVertexColor;
+    }
+`;
 
 
 class App 
@@ -88,47 +91,69 @@ class App
         /**
          * @type { WebGL2RenderingContext }
          */
-        this.gl = null;
+        this.gl = null ;
         /**
          * @type { WebGLProgram }
          */
-        this.program = null;
+        this.program = null ;
 
-        /** @type { WebGLVertexArrayObject } */
-        this.sphereVAO;
+        /** 
+         * @type { WebGLVertexArrayObject } 
+         */
+        this.sphereVAO ;
 
-        /** @type { WebGLBuffer } */
-        this.sphereVertexBuffer;
-        /** @type { WebGLBuffer } */
-        this.sphereNormalsBuffer;
-        /** @type { WebGLBuffer } */
+        /** 
+         * @type { WebGLBuffer }
+         */
+        this.sphereVertexBuffer ;
+        /**
+         * @type { WebGLBuffer }
+         */
+        this.sphereNormalsBuffer ;
+        /** 
+         * @type { WebGLBuffer }
+         */
+        this.sphereIndexBuffer ;
 
-        this.sphereIndexBuffer;
-        /** @type { Array<number> } */
+        /**
+         * @type { Array<number> }
+         */
 
-        this.vertices;
-        this.indices;
+        this.vertices ;
+        /**
+         * @type {Array<number>}
+         */
+        this.indices ;
+        
+        this.sphereColor = [ 0.5, 0.8, 0.1 ];
 
         this.lightDiffuseColor = [ 1, 1, 1 ];
         this.ligthDirection = [ 0, -1, -1 ];
-        this.sphereColor = [ 0.5, 0.8, 0.1 ];
+
+        
+        /**
+         * @type {mat4}
+         */
+        this.modelViewMatrix    = mat4.create() ;
+
+        this.worldMatrix        = mat4.create() ;
+        /**
+         * @type {mat4}
+         */
+        this.normalMatrix       = mat4.create() ;
 
         /**
-         * @type { glm.mat4 }
+         * @type {mat4} 카메라의 월드행렬
          */
-        this.cameraMatrix       = glm.mat4.create();
+        this.cameraMatrix       = mat4.create() ;
         /**
-         * @type { glm.mat4 }
+         * @type {mat4} 카메라 월드행렬의 역행렬, 일명 뷰행렬
          */
-        this.modelViewMatrix    = glm.mat4.create();
+        this.viewMatrix         = mat4.create() ;
         /**
-         * @type { glm.mat4 }
+         * @type {mat4} 카메라의 투영행렬
          */
-        this.projectionMatrix   = glm.mat4.create();
-        /**
-         * @type { glm.mat4 }
-         */
-        this.normalMatrix       = glm.mat4.create();
+        this.projectionMatrix   = mat4.create() ;
 
     }
 
@@ -139,77 +164,75 @@ class App
      */
     init( vertCode, fragCode )
     {
-        this.gl = utils.getGLContext( this.canvas );
+        this.gl = utils.getGLContext( this.canvas ) ;
 
-        this.gl.clearColor( 0.3, 0.3, 0.3, 1.0 );
-        this.gl.enable( this.gl.DEPTH_TEST );
+        this.gl.clearColor( 0.3, 0.3, 0.3, 1.0 ) ;
+        this.gl.enable( this.gl.DEPTH_TEST ) ;
 
-        this.initProgram( this.gl, vertCode, fragCode );
-
+        this.initProgram( this.gl, vertCode, fragCode ) ;
+        this.initCamera( vec3.fromValues( 0, 0, 5 ), vec3.fromValues( 0, 0, 0 ) ) ;
         this.initLights( this.gl ) ;
-
-        this.initBuffers();
-
-        this.initControls();
+        this.initBuffers() ;
+        this.initControls() ;
 
     }
 
     draw()
     {
         const gl    = this.gl ;
-        const mat4  = glm.mat4 ;
 
-        // Clear the scene
-        gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
-        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+        gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height ) ;    // 뷰포트
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT ) ;     // 프레임버퍼 클리어
 
-        // Camera
-        mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
+        // 카메라
+        gl.uniformMatrix4fv( this.program.uViewMatrix, false, this.viewMatrix ) ;
+        gl.uniformMatrix4fv( this.program.uProjectionMatrix, false, this.projectionMatrix ) ;
 
         /**
          * @type { glm.mat4 }
          */
-        let worldTM = glm.mat4.create() ;
+        let worldTM = mat4.create() ;
 
-        mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ 2.0, 0.0, -5.0 ] );
+        mat4.identity( worldTM ) ;
+        mat4.translate( worldTM, worldTM, [ 1.5, 0.0, 0.0 ] ) ;
 
-        this.draw_object( worldTM );
+        this.draw_object( worldTM ) ;
 
-        mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ 0.0, 0.0, -5.0 ] );
+        mat4.identity( worldTM ) ;
+        mat4.translate( worldTM, worldTM,[ 0.0, 0.0, 0.0 ] ) ;
 
-        this.draw_object( worldTM );
+        this.draw_object( worldTM ) ;
 
+        mat4.identity( worldTM ) ;
+        mat4.translate( worldTM, worldTM,[ -1.5, 0.0, 0.0 ] ) ;
 
-        mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ -2.0, 0.0, -5.0 ] );
-
-        this.draw_object( worldTM );
+        this.draw_object( worldTM ) ;
 
     }
 
     /**
      * 
-     * @param { glm.mat4 } modelViewMatrix 
+     * @param { glm.mat4 } worldMatrix 
      */
-    draw_object( modelViewMatrix )
+    draw_object( worldMatrix )
     {
-        const gl    = this.gl ;
-        const mat4  = glm.mat4 ;
+        const gl = this.gl ;
+ 
+        mat4.copy( this.modelViewMatrix, worldMatrix ) ;
+        mat4.copy( this.worldMatrix, worldMatrix ) ;
 
-        mat4.copy( this.modelViewMatrix, modelViewMatrix );
+        //mat4.copy( this.normalMatrix, this.modelViewMatrix ) ;
+        mat4.copy( this.normalMatrix, this.worldMatrix ) ;
+        mat4.invert( this.normalMatrix, this.normalMatrix ) ;
+        mat4.transpose( this.normalMatrix, this.normalMatrix ) ;
 
-        mat4.copy( this.normalMatrix, this.modelViewMatrix );
-        mat4.invert( this.normalMatrix, this.normalMatrix );
-        mat4.transpose( this.normalMatrix, this.normalMatrix );
+        gl.uniformMatrix4fv( this.program.uModelViewMatrix, false, this.modelViewMatrix ) ;
+        //gl.uniformMatrix4fv( this.program.uProjectionMatrix, false, this.projectionMatrix ) ;
+        gl.uniformMatrix4fv( this.program.uWorldMatrix, false, this.worldMatrix ) ;
+        gl.uniformMatrix4fv( this.program.uNormalMatrix, false, this.normalMatrix ) ;
 
-        gl.uniformMatrix4fv( this.program.uModelViewMatrix, false, this.modelViewMatrix );
-        gl.uniformMatrix4fv( this.program.uProjectionMatrix, false, this.projectionMatrix );
-        gl.uniformMatrix4fv( this.program.uNormalMatrix, false, this.normalMatrix );
-
-        gl.bindVertexArray( this.sphereVAO );
-        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.sphereIndexBuffer );
+        gl.bindVertexArray( this.sphereVAO ) ;
+        gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, this.sphereIndexBuffer ) ;
 
         gl.drawElements( gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0 );
 
@@ -323,38 +346,54 @@ class App
     }
 
     /**
+     * 
+     * @param {vec3} eye 카메라의 위치 ( 월드좌표계 )
+     * @param {vec3} target 카메라가 바라보는 곳 ( 월드좌표계 )
+     */
+    initCamera( eye, target )
+    {
+        mat4.identity( this.cameraMatrix, this.cameraMatrix ) ;
+        mat4.targetTo( this.cameraMatrix, eye, target, vec3.fromValues( 0, 1, 0 ) ) ;
+
+        mat4.invert( this.viewMatrix, this.cameraMatrix ) ;
+        mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), this.canvas.width / this.canvas.height, 0.1, 10000 ) ;
+    }
+
+    /**
      * Create a program with the appropriate vertex and fragment shaders
      * @param {WebGL2RenderingContext} gl
-     * @param {string} vertCode 
-     * @param {string} fragCode 
+     * @param {string} vertCode 버텍스 셰이더 소스코드
+     * @param {string} fragCode 프레그먼트 셰이더 소스코드
      */
     initProgram( gl, vertCode, fragCode ) 
     {
-        const vertexShader      = this.compileShader( gl, vertCode, gl.VERTEX_SHADER );
-        const fragmentShader    = this.compileShader( gl, fragCode, gl.FRAGMENT_SHADER );
+        const vertexShader      = this.compileShader( gl, vertCode, gl.VERTEX_SHADER ) ;
+        const fragmentShader    = this.compileShader( gl, fragCode, gl.FRAGMENT_SHADER ) ;
 
-        const program           = gl.createProgram();
-        gl.attachShader( program, vertexShader );
-        gl.attachShader( program, fragmentShader );
-        gl.linkProgram( program );
+        const program           = gl.createProgram() ;
+        gl.attachShader( program, vertexShader ) ;
+        gl.attachShader( program, fragmentShader ) ;
+        gl.linkProgram( program ) ;
 
         if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
             //console.error( 'Could not initialize shaders' );
-            console.error( "[e] shader program error : " + gl.getProgramInfoLog( program ) );
+            console.error( "[e] shader program error : " + gl.getProgramInfoLog( program ) ) ;
             return;
         }
 
-        gl.useProgram( program );
+        gl.useProgram( program ) ;
 
-        program.aVertexPosition     = gl.getAttribLocation( program, 'aVertexPosition' );
-        program.aVertexNormal       = gl.getAttribLocation( program, 'aVertexNormal' );
+        program.aVertexPosition     = gl.getAttribLocation( program, 'aVertexPosition' ) ;
+        program.aVertexNormal       = gl.getAttribLocation( program, 'aVertexNormal' ) ;
 
-        program.uModelViewMatrix    = gl.getUniformLocation( program, 'uModelViewMatrix' );
-        program.uProjectionMatrix   = gl.getUniformLocation( program, 'uProjectionMatrix' );
-        program.uNormalMatrix       = gl.getUniformLocation( program, 'uNormalMatrix' );
-        program.uMaterialDiffuse    = gl.getUniformLocation( program, 'uMaterialDiffuse' );
-        program.uLightDiffuse       = gl.getUniformLocation( program, 'uLightDiffuse' );
-        program.uLightDirection     = gl.getUniformLocation( program, 'uLightDirection' );
+        program.uWorldMatrix        = gl.getUniformLocation( program, 'uWorldMatrix' ) ;
+        program.uViewMatrix         = gl.getUniformLocation( program, 'uViewMatrix' ) ;
+        program.uModelViewMatrix    = gl.getUniformLocation( program, 'uModelViewMatrix' ) ;
+        program.uProjectionMatrix   = gl.getUniformLocation( program, 'uProjectionMatrix' ) ;
+        program.uNormalMatrix       = gl.getUniformLocation( program, 'uNormalMatrix' ) ;
+        program.uMaterialDiffuse    = gl.getUniformLocation( program, 'uMaterialDiffuse' ) ;
+        program.uLightDiffuse       = gl.getUniformLocation( program, 'uLightDiffuse' ) ;
+        program.uLightDirection     = gl.getUniformLocation( program, 'uLightDirection' ) ;
 
         this.program = program ;
     }
@@ -395,6 +434,8 @@ class App
     {
         this.canvas.width    = window.innerWidth ;
         this.canvas.height   = window.innerHeight * 0.9 ;
+
+        mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), this.canvas.width / this.canvas.height, 0.1, 10000 ) ;
     }
 }
 
@@ -422,8 +463,8 @@ function render()
     requestAnimationFrame( render );
 }
 
-// Call init once the webpage has loaded
-window.onload = init;
-window.onresize = resize;
+
+window.onload   = init ;    // 웹페이지 로딩 완료 후 1번 호출
+window.onresize = resize ;  // 웹페이지 크기 변경 시 반복 호출
 
 
