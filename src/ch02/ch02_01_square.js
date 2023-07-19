@@ -1,83 +1,92 @@
 'use strict';
 
-import utils from '../common/Utils.js';
+import utils from '../common/Utils.js' ;
 
-/** @type { HTMLCanvasElement } */
-let canvas;
-/** @type { WebGL2RenderingContext } */
-let gl;
-/** @type { WebGLProgram } */
-let program;
-/** @type { WebGLBuffer } */
-let squareVertexBuffer;
-/** @type { WebGLBuffer } */
-let squareIndexBuffer;
-/** @type { Array<number> } */
-let indices;
-/** @type { WebGLVertexArrayObject } */
-let squareVAO;
 
-/** @type { string } */
-const vertCode = 
-`#version 300 es
-#pragma vscode_glsllint_stage: vert
+/**
+ * @type {HTMLCanvasElement} 캔버스 요소
+ */
+let canvas ;
+/**
+ * @type {WebGL2RenderingContext} gl 컨텍스트
+ */
+let gl ;
+/**
+ * @type {WebGLProgram} 셰이더 프로그램
+ */
+let program ;
+/**
+ * @type {WebGLBuffer} 위치용 VBO
+ */
+let squarePositionVBO ;
+/**
+ * @type {WebGLBuffer} 인덱스용 VBO
+ */
+let squareIndexVBO ;
 
-precision mediump float;
+/**
+ * @type {number[]} 정점의 위치 데이터
+ */
+let vertices = [] ;
+/**
+ * @type {number[]} 인덱스 데이터
+ */
+let indices = [] ;
 
-// Supplied vertex position attribute
-in vec3 aVertexPosition;
+let vertCode = `#version 300 es
+    #pragma vscode_glsllint_stage : vert
 
-void main( void ) 
-{
-    // Set the position in clipspace coordinates
-    gl_Position = vec4( aVertexPosition, 1.0 );
-}`;
+    precision mediump float;
 
-const fragCode =
-`#version 300 es
-#pragma vscode_glsllint_stage: frag
+    // Supplied vertex position attribute
+    in vec3 aVertexPosition;
 
-precision mediump float;
+    void main(void) {
+        // Set the position in clipspace coordinates
+        gl_Position = vec4( aVertexPosition, 1.0 );
+    }
+`;
 
-// Color that is the result of this shader
-out vec4 fragColor;
+let fragCode = `#version 300 es
+    #pragma vscode_glsllint_stage : frag
 
-void main( void ) 
-{
+    precision mediump float;
+
+    // Color that is the result of this shader
+    out vec4 fragColor;
+
+    void main(void) {
     // Set the result as red
-    fragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
-}`;
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+`;
+
 
 /**
  * 
- * @param {string} shaderCode Shader source code
- * @param {number} shaderType WebGL2RenderingContext.VERTEX_SHADER | WebGL2RenderingContext.FRAGMENT_SHADER
- * @returns {WebGLShader}
+ * @param {string} shaderCode 셰이더 코드
+ * @param {number} shaderType gl.VERTEX_SHADER | gl.FRAGMENT_SHADER
+ * @returns 
  */
-function compileShader( shaderCode, shaderType )
-{
-    /** @type {WebGLShader} */
+function getShaderFromCode( shaderCode, shaderType ) {
+
+    /**
+     * @type {WebGLShader}
+     */
     let shader;
-    if ( shaderType === gl.VERTEX_SHADER ) 
-    {
+    if ( shaderType ==  gl.VERTEX_SHADER ) {
         shader = gl.createShader( gl.VERTEX_SHADER );
-    }
-    else if ( shaderType === gl.FRAGMENT_SHADER ) 
-    {
+    } else if ( shaderType == gl.FRAGMENT_SHADER ) {
         shader = gl.createShader( gl.FRAGMENT_SHADER );
-    }
-    else 
-    {
+    } else {
+        console.error( 'Unknown ShaderType' ) ;
         return null;
     }
 
-    // Compile the shader using the supplied shader code
     gl.shaderSource( shader, shaderCode );
     gl.compileShader( shader );
 
-    // Ensure the shader is valid
-    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) 
-    {
+    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
         console.error( gl.getShaderInfoLog( shader ) );
         return null;
     }
@@ -86,36 +95,33 @@ function compileShader( shaderCode, shaderType )
 }
 
 /**
- * Create a program with the appropriate vertex and fragment shaders
- * @param {string} vertCode 
- * @param {string} fragCode 
+ * 셰이더 프로그램 생성 및 Attribute Location 조회
  */
-function initProgram( vertCode, fragCode ) 
-{
-    const vertexShader   = compileShader( vertCode, gl.VERTEX_SHADER );
-    const fragmentShader = compileShader( fragCode, gl.FRAGMENT_SHADER );
+function initProgram() {
+
+    const vertexShader      = getShaderFromCode( vertCode, gl.VERTEX_SHADER );
+    const fragmentShader    = getShaderFromCode( fragCode, gl.FRAGMENT_SHADER );
+    console.log( vertexShader ) ;
 
     program = gl.createProgram();
+
     gl.attachShader( program, vertexShader );
     gl.attachShader( program, fragmentShader );
     gl.linkProgram( program );
 
-    if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) 
-    {
-        //console.error( 'Could not initialize shaders' );
-        console.error( "[e] shader program error : " + gl.getProgramInfoLog( program ) ) ;
+    if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
+        console.error( 'Could not initialize shaders' );
     }
 
     gl.useProgram( program );
-    
-    // We attach the location of these shader values to the program instance
-    // for easy access later in the code
+
     program.aVertexPosition = gl.getAttribLocation( program, 'aVertexPosition' );
 }
 
-// Set up the buffers for the square
-function initBuffers() 
-{
+/**
+ * 지오메트리용 버퍼 생성
+ */
+function initBuffers() {
     /*
       V0                    V3
       (-0.5, 0.5, 0)        (0.5, 0.5, 0)
@@ -129,72 +135,61 @@ function initBuffers()
       V1                    V2
       (-0.5, -0.5, 0)       (0.5, -0.5, 0)
     */
-    const vertices = [
-        -0.5,  0.5, 0,
+    vertices = [
+        -0.5, 0.5, 0,
         -0.5, -0.5, 0,
-         0.5, -0.5, 0,
-         0.5,  0.5, 0
+        0.5, -0.5, 0,
+        0.5, 0.5, 0
     ];
 
-    // Indices defined in counter-clockwise order
-    indices = [0, 1, 2, 0, 2, 3];
+    indices = [ 0, 1, 2, 0, 2, 3 ];
 
-    squareVertexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, squareVertexBuffer );
+    squarePositionVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, squarePositionVBO );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.STATIC_DRAW );
 
-    // Setting up the IBO
-    squareIndexBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer );
+    squareIndexVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexVBO );
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( indices ), gl.STATIC_DRAW );
 
-    // Clean
     gl.bindBuffer( gl.ARRAY_BUFFER, null );
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 }
 
 // We call draw to render to our canvas
-function draw() 
-{
-    // Clear the scene
-    gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
+function draw() {
+ 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+    gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
 
-    gl.bindBuffer( gl.ARRAY_BUFFER, squareVertexBuffer );
+    gl.bindBuffer( gl.ARRAY_BUFFER, squarePositionVBO );
     gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( program.aVertexPosition );
 
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer );
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexVBO );
 
-    // Draw to the scene using triangle primitives
     gl.drawElements( gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0 );
 
-    // Clean
     gl.bindBuffer( gl.ARRAY_BUFFER, null );
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 }
 
 // Entry point to our application
-function init() 
-{
-    // Retrieve the canvas
+function init() {
+
     canvas = utils.getCanvas( 'webgl-canvas' );
 
-    // Set the canvas to the size of the screen
-    canvas.width  = window.innerWidth ;
-    canvas.height = window.innerHeight * 0.9 ;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight * 0.9;
 
-    // Retrieve a WebGL context
     gl = utils.getGLContext( canvas );
-    // Set the clear color to be black
-    gl.clearColor( 0.2, 0.2, 0.2, 1.0 );
+    gl.clearColor( 0.3, 0.3, 0.3, 1 );
 
-    // Call the functions in an appropriate order
-    initProgram( vertCode, fragCode );
+    initProgram();
     initBuffers();
     draw();
 }
 
-// Call init once the webpage has loaded
+
 window.onload = init;
 

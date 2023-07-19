@@ -59,39 +59,6 @@ let fragCode = `#version 300 es
 
 /**
  * 
- * @param {string} id 셰이더소스용 스크립트요소 ID
- * @returns 
- */
-function getShader( id ) {
-
-    const script = document.getElementById( id );
-    const shaderString = script.text.trim();
-
-    /**
-     * @type {WebGLShader}
-     */
-    let shader;
-    if ( script.type === 'x-shader/x-vertex' ) {
-        shader = gl.createShader( gl.VERTEX_SHADER );
-    } else if ( script.type === 'x-shader/x-fragment' ) {
-        shader = gl.createShader( gl.FRAGMENT_SHADER );
-    } else {
-        return null;
-    }
-
-    gl.shaderSource( shader, shaderString );
-    gl.compileShader( shader );
-
-    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-        console.error( gl.getShaderInfoLog( shader ) );
-        return null;
-    }
-
-    return shader;
-}
-
-/**
- * 
  * @param {string} shaderCode 셰이더 코드
  * @param {number} shaderType gl.VERTEX_SHADER | gl.FRAGMENT_SHADER
  * @returns 
@@ -216,7 +183,7 @@ function init() {
     // Retrieve a WebGL context
     gl = utils.getGLContext( canvas );
     // Set the clear color to be black
-    gl.clearColor( 0, 0, 0, 1 );
+    gl.clearColor( 0.3, 0.3, 0.3, 1 );
 
     // Call the functions in an appropriate order
     initProgram();

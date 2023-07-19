@@ -1,5 +1,6 @@
 'use strict';
 
+import { mat4 } from 'gl-matrix';
 import utils from '../common/Utils.js' ;
 
 
@@ -19,15 +20,15 @@ let program ;
 /**
  * @type {WebGLVertexArrayObject} 메시용 VAO
  */
-let squareVAO ;
+let coneVAO ;
 /**
  * @type {WebGLBuffer} 위치용 VBO
  */
-let squarePositionVBO ;
+let conePositionVBO ;
 /**
  * @type {WebGLBuffer} 인덱스용 VBO
  */
-let squareIndexVBO ;
+let coneIndexVBO ;
 
 /**
  * @type {number[]} 정점의 위치 데이터
@@ -37,32 +38,55 @@ let vertices = [] ;
  * @type {number[]} 인덱스 데이터
  */
 let indices = [] ;
+/**
+ * @type {mat4} 모델뷰 행렬, 뷰행렬 * 모델행렬
+ */
+let modelviewMatrix = mat4.create() ;
+/**
+ * @type {mat4} 메시의 월드 변환 행렬
+ */
+let modelMatrix = mat4.create() ;
+/**
+ * @type {mat4} 카메라의 월드 변환 행렬의 역행렬
+ */
+let viewMatirx = mat4.create() ;
+/**
+ * @type {mat4} 카메라의 투영행렬
+ */
+let projectionMatrix = mat4.create() ;
+
+let angle = 0 ;
 
 let vertCode = `#version 300 es
     #pragma vscode_glsllint_stage : vert
 
-    precision mediump float;
+    precision mediump float ;
 
-    // Supplied vertex position attribute
-    in vec3 aVertexPosition;
+    in vec3         aVertexPosition ;
+
+    //uniform mat4    uModelViewMatrix ;
+    uniform mat4    uModelMatrix ;
+    uniform mat4    uViewMatrix ;
+    uniform mat4    uProjectionMatrix ;
 
     void main(void) {
-        // Set the position in clipspace coordinates
-        gl_Position = vec4( aVertexPosition, 1.0 );
+
+        //gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
+        gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4( aVertexPosition, 1.0 );
+        
     }
 `;
 
 let fragCode = `#version 300 es
     #pragma vscode_glsllint_stage : frag
 
-    precision mediump float;
+    precision mediump float ;
 
-    // Color that is the result of this shader
-    out vec4 fragColor;
+    out vec4 fragColor ;
 
     void main(void) {
-    // Set the result as red
-    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+
+        fragColor = vec4( 0.5, 0.9, 0.2, 1.0 );
     }
 `;
 
@@ -121,6 +145,11 @@ function initProgram() {
     gl.useProgram( program );
 
     program.aVertexPosition = gl.getAttribLocation( program, 'aVertexPosition' );
+
+    program.uModelViewMatrix = gl.getUniformLocation( program, 'uModelViewMatrix' );
+    program.uModelMatrix = gl.getUniformLocation( program, 'uModelMatrix' );
+    program.uViewMatrix = gl.getUniformLocation( program, 'uViewMatrix' );
+    program.uProjectionMatrix = gl.getUniformLocation( program, 'uProjectionMatrix' );
 }
 
 /**
@@ -141,25 +170,43 @@ function initBuffers() {
       (-0.5, -0.5, 0)       (0.5, -0.5, 0)
     */
     vertices = [
-        -0.5, 0.5, 0,
-        -0.5, -0.5, 0,
-        0.5, -0.5, 0,
-        0.5, 0.5, 0
+        1.5, 0, 0,
+        -1.5, 1, 0,
+        -1.5, 0.809017, 0.587785,
+        -1.5, 0.309017, 0.951057,
+        -1.5, -0.309017, 0.951057,
+        -1.5, -0.809017, 0.587785,
+        -1.5, -1, 0,
+        -1.5, -0.809017, -0.587785,
+        -1.5, -0.309017, -0.951057,
+        -1.5, 0.309017, -0.951057,
+        -1.5, 0.809017, -0.587785
     ];
 
-    indices = [ 0, 1, 2, 0, 2, 3 ];
+    indices = [ 
+        0, 1, 2,
+        0, 2, 3,
+        0, 3, 4,
+        0, 4, 5,
+        0, 5, 6,
+        0, 6, 7,
+        0, 7, 8,
+        0, 8, 9,
+        0, 9, 10,
+        0, 10, 1
+    ];
 
-    squareVAO = gl.createVertexArray();
-    gl.bindVertexArray( squareVAO );
+    coneVAO = gl.createVertexArray();
+    gl.bindVertexArray( coneVAO );
 
-    squarePositionVBO = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, squarePositionVBO );
+    conePositionVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, conePositionVBO );
     gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.STATIC_DRAW );
     gl.enableVertexAttribArray( program.aVertexPosition );
     gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
 
-    squareIndexVBO = gl.createBuffer();
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexVBO );
+    coneIndexVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, coneIndexVBO );
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( indices ), gl.STATIC_DRAW );
 
     gl.bindVertexArray( null );
@@ -167,25 +214,39 @@ function initBuffers() {
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 }
 
+
 // We call draw to render to our canvas
 function draw() {
+
+    angle += 2 ;
  
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
 
-    gl.bindVertexArray( squareVAO ) ;
+    mat4.perspective( projectionMatrix, 45 * Math.PI / 180, gl.canvas.width / gl.canvas.height, 0.1, 10000.0 );
 
-    // gl.bindBuffer( gl.ARRAY_BUFFER, squarePositionVBO );
-    // gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
-    // gl.enableVertexAttribArray( program.aVertexPosition );
+    mat4.lookAt( viewMatirx, [ 0, 3, 10 ], [ 0, 0, 0 ], [ 0, 1, 0 ] );
 
-    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, squareIndexVBO );
+    mat4.identity( modelMatrix );
+    //mat4.rotate( modelMatrix, modelMatrix, angle * Math.PI / 180, [ 0, 1, 0 ] );
+    mat4.translate( modelMatrix, modelMatrix, [ 0, 0, -10 ] );
+    mat4.rotate( modelMatrix, modelMatrix, angle * Math.PI / 180, [ 0, 1, 0 ] );
+    mat4.rotate( modelMatrix, modelMatrix, angle * Math.PI / 180, [ 0, 0, 1 ] );
 
-    gl.drawElements( gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0 );
+    gl.uniformMatrix4fv( program.uProjectionMatrix, false, projectionMatrix );
+    gl.uniformMatrix4fv( program.uViewMatrix, false, viewMatirx );
+    gl.uniformMatrix4fv( program.uModelMatrix, false, modelMatrix );
+    gl.uniformMatrix4fv( program.uModelViewMatrix, false, modelviewMatrix );
+
+    gl.bindVertexArray( coneVAO ) ;
+
+    gl.drawElements( gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0 );
 
     gl.bindVertexArray( null );
-    // gl.bindBuffer( gl.ARRAY_BUFFER, null );
-    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+    gl.bindBuffer( gl.ARRAY_BUFFER, null );
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+
+    requestAnimationFrame( draw ); // 호출요청으로 반복호출 효과
 }
 
 // Entry point to our application
@@ -201,6 +262,7 @@ function init() {
 
     initProgram();
     initBuffers();
+
     draw();
 }
 
