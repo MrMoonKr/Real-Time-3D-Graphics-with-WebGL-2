@@ -32,7 +32,9 @@ module.exports = async () => {
 
         entry: {
             // https://webpack.js.org/configuration/entry-context/#entry
-            //ch01_00_hello: './src/ch01_00_hello.js',
+
+            ch01_00_hello: './src/ch01_00_hello.js',
+            ch02_00_hello: './src/ch02_00_hello.js',
 
             ...generatedEntries,
 

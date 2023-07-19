@@ -42,8 +42,8 @@ const vertCode = /*glsl*/ `#version 300 es
         vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
 
         // Normalized light direction
-        //vec3 L      = normalize( uLightPosition ) ;
-        vec3 L      = normalize( vec3( -uLightPosition.x, -uLightPosition.y, uLightPosition.z ) ) ;
+        vec3 L      = normalize( uLightPosition - vec3( uWorldMatrix * vec4( aVertexPosition, 1.0 ) ) ) ;
+        //vec3 L      = normalize( vec3( -uLightPosition.x, -uLightPosition.y, uLightPosition.z ) ) ;
 
         // Dot product of the normal product and negative light direction vector
         float lambertTerm = dot( N, L ) ;
