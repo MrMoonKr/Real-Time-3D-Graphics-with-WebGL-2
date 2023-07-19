@@ -135,16 +135,13 @@
       // Setting locations onto `program` instance
       program.aVertexPosition = gl.getAttribLocation(program, 'aVertexPosition');
       program.aVertexNormal = gl.getAttribLocation(program, 'aVertexNormal');
-
       program.uProjectionMatrix = gl.getUniformLocation(program, 'uProjectionMatrix');
       program.uModelViewMatrix = gl.getUniformLocation(program, 'uModelViewMatrix');
       program.uNormalMatrix = gl.getUniformLocation(program, 'uNormalMatrix');
-
       program.uMaterialAmbient = gl.getUniformLocation(program, 'uMaterialAmbient');
       program.uMaterialDiffuse = gl.getUniformLocation(program, 'uMaterialDiffuse');
       program.uMaterialSpecular = gl.getUniformLocation(program, 'uMaterialSpecular');
       program.uShininess = gl.getUniformLocation(program, 'uShininess');
-      
       program.uLightPosition = gl.getUniformLocation(program, 'uLightPosition');
       program.uLightAmbient = gl.getUniformLocation(program, 'uLightAmbient');
       program.uLightDiffuse = gl.getUniformLocation(program, 'uLightDiffuse');
@@ -167,7 +164,7 @@
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      mat4.perspective(projectionMatrix, 45, gl.canvas.width / gl.canvas.height, 0.1, 1000);
+      mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 1000);
 
       // We will start using the `try/catch` to capture any errors from our `draw` calls
       try {

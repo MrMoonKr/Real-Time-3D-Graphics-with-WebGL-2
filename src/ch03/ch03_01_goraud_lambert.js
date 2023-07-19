@@ -5,17 +5,17 @@ import { mat4, vec3 } from 'gl-matrix' ;
 import * as dat from 'dat.gui';
 
 /**
- * @type { HTMLCanvasElement } WebGL용 캔버스 요소
+ * @type {HTMLCanvasElement} WebGL용 캔버스 요소
  */
 let canvas;
 
 /** 
- * @type { App } 로직 진행
+ * @type {App} 로직 진행
  */
 let app = null ;
 
 /**
- * @type { string } 정점셰이더
+ * @type {string} 정점셰이더
  */
 const vertCode = /*glsl*/ `#version 300 es
     #pragma vscode_glsllint_stage: vert
@@ -27,7 +27,7 @@ const vertCode = /*glsl*/ `#version 300 es
     uniform mat4    uModelViewMatrix ;
     uniform mat4    uViewMatrix ;
     uniform mat4    uProjectionMatrix ;
-    uniform vec3    uLightDirection ;
+    uniform vec3    uLightPosition ;
     uniform vec3    uLightDiffuse ;
     uniform vec3    uMaterialDiffuse ;
 
@@ -42,10 +42,11 @@ const vertCode = /*glsl*/ `#version 300 es
         vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
 
         // Normalized light direction
-        vec3 L      = normalize( uLightDirection ) ;
+        //vec3 L      = normalize( uLightPosition ) ;
+        vec3 L      = normalize( vec3( -uLightPosition.x, -uLightPosition.y, uLightPosition.z ) ) ;
 
         // Dot product of the normal product and negative light direction vector
-        float lambertTerm = dot( N, -L ) ;
+        float lambertTerm = dot( N, L ) ;
 
         // Calculating the diffuse color based on the Lambertian reflection model
         vec3 Id     = uMaterialDiffuse * uLightDiffuse * lambertTerm ;
@@ -128,7 +129,7 @@ class App
         this.sphereColor = [ 0.5, 0.8, 0.1 ];
 
         this.lightDiffuseColor = [ 1, 1, 1 ];
-        this.ligthDirection = [ 0, -1, -1 ];
+        this.lightPosition = [ 0, 0, 5 ];
 
         
         /**
@@ -194,7 +195,7 @@ class App
         let worldTM = mat4.create() ;
 
         mat4.identity( worldTM ) ;
-        mat4.translate( worldTM, worldTM, [ 1.5, 0.0, 0.0 ] ) ;
+        mat4.translate( worldTM, worldTM, [ 2, 0.0, 0.0 ] ) ;
 
         this.draw_object( worldTM ) ;
 
@@ -204,7 +205,7 @@ class App
         this.draw_object( worldTM ) ;
 
         mat4.identity( worldTM ) ;
-        mat4.translate( worldTM, worldTM,[ -1.5, 0.0, 0.0 ] ) ;
+        mat4.translate( worldTM, worldTM,[ -4, 0.0, 0.0 ] ) ;
 
         this.draw_object( worldTM ) ;
 
@@ -218,7 +219,7 @@ class App
     {
         const gl = this.gl ;
  
-        mat4.copy( this.modelViewMatrix, worldMatrix ) ;
+        //mat4.copy( this.modelViewMatrix, worldMatrix ) ;
         mat4.copy( this.worldMatrix, worldMatrix ) ;
 
         //mat4.copy( this.normalMatrix, this.modelViewMatrix ) ;
@@ -226,7 +227,7 @@ class App
         mat4.invert( this.normalMatrix, this.normalMatrix ) ;
         mat4.transpose( this.normalMatrix, this.normalMatrix ) ;
 
-        gl.uniformMatrix4fv( this.program.uModelViewMatrix, false, this.modelViewMatrix ) ;
+        //gl.uniformMatrix4fv( this.program.uModelViewMatrix, false, this.modelViewMatrix ) ;
         //gl.uniformMatrix4fv( this.program.uProjectionMatrix, false, this.projectionMatrix ) ;
         gl.uniformMatrix4fv( this.program.uWorldMatrix, false, this.worldMatrix ) ;
         gl.uniformMatrix4fv( this.program.uNormalMatrix, false, this.normalMatrix ) ;
@@ -263,12 +264,12 @@ class App
             },
             ...[ 'Translate X', 'Translate Y', 'Translate Z' ].reduce( ( result, name, i ) => {
                 result[ name ] = {
-                    value: this.ligthDirection[ i ],
+                    value: this.lightPosition[ i ],
                     min: -10,
                     max: 10,
                     step: -0.1,
                     onChange: ( v, state ) => {
-                        this.gl.uniform3fv( this.program.uLightDirection, [
+                        this.gl.uniform3fv( this.program.uLightPosition, [
                             -state[ 'Translate X' ],
                             -state[ 'Translate Y' ],
                              state[ 'Translate Z' ]
@@ -337,7 +338,7 @@ class App
         gl.uniform3fv( this.program.uMaterialDiffuse, this.sphereColor );
 
         gl.uniform3fv( this.program.uLightDiffuse, this.lightDiffuseColor );
-        gl.uniform3fv( this.program.uLightDirection, this.ligthDirection );
+        gl.uniform3fv( this.program.uLightPosition, this.lightPosition );
     }
 
     updateMeshColor()
@@ -393,7 +394,7 @@ class App
         program.uNormalMatrix       = gl.getUniformLocation( program, 'uNormalMatrix' ) ;
         program.uMaterialDiffuse    = gl.getUniformLocation( program, 'uMaterialDiffuse' ) ;
         program.uLightDiffuse       = gl.getUniformLocation( program, 'uLightDiffuse' ) ;
-        program.uLightDirection     = gl.getUniformLocation( program, 'uLightDirection' ) ;
+        program.uLightPosition     = gl.getUniformLocation( program, 'uLightPosition' ) ;
 
         this.program = program ;
     }
