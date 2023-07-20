@@ -253,7 +253,7 @@ function draw() {
 function onLoad( data )
 {
     console.log( '[파일로더] 성공' ) ;
-    console.log( data ) ;
+    //console.log( data ) ;
 }
 
 function onProgress( event )
@@ -269,8 +269,17 @@ function onError( error )
 // Entry point to our application
 function init() {
 
-    let loader = new FileLoader() ;
-    loader.load( './ch02_01_square.html', onLoad, onProgress, onError );
+    //let loader = new FileLoader() ;
+    //loader.load( './ch02_01_square.html', onLoad, onProgress, onError );
+
+    let helloWorker = new Worker( '/src/workers/HelloWorker.js' ) ;
+    helloWorker.onmessage = function ( e ) {
+
+        let data = e.data ;
+        console.log( '워커응답받음' );
+        console.log( data ) ;
+    }
+    helloWorker.postMessage( '***워커에메시지***' ) ;
 
     canvas = utils.getCanvas( 'webgl-canvas' );
 
