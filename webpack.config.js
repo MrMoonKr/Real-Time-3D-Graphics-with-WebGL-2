@@ -58,15 +58,16 @@ module.exports = async () => {
             } 
         },
 
-        devtool: 'source-map',
+        //devtool: 'source-map',
+        devtool: 'inline-cheap-module-source-map',
 
         plugins: [
             // https://webpack.js.org/plugins/source-map-dev-tool-plugin
-            new SourceMapDevToolPlugin( {
-                filename:'[file].map',
-                //append: '\n//# sourceMappingURL=[file].map'
-                append: '\n//# sourceMappingURL=[name].bundle.js.map'
-            } ) ,
+            // new SourceMapDevToolPlugin( {
+            //     filename:'[file].map',
+            //     //append: '\n//# sourceMappingURL=[file].map'
+            //     append: '\n//# sourceMappingURL=[name].bundle.js.map'
+            // } ) ,
 
             ...generatedPlugins ,
 
@@ -135,13 +136,15 @@ const getDirectoryEntries = async ( parentPath, chapters, template='./src/templa
 
             const name = path.parse( candiate.name ).name ;
             const plugin = new HtmlWebpackPlugin( {
-                filename: chapter + '/' + name + '.html' ,
+                //filename: chapter + '/' + name + '.html' ,
+                filename: path.join( chapter, name+'.html' ),
                 chunks: [name] ,
                 template: template
             } ) ;
 
             generatedEntries[ name ] = {
-                import: parentPath + chapter + '/' + candiate.name 
+                //import: parentPath + chapter + '/' + candiate.name 
+                import: path.join( parentPath, chapter, candiate.name )
             }
 
             generatedPlugins.push( plugin ) ;

@@ -36,6 +36,36 @@ class Loader
         //
     }
 
+    setPath( path )
+    {
+        this.path = path;
+        return this;
+    }
+
+    setCrossOrigin( crossOrigin )
+    {
+        this.crossOrigin = crossOrigin;
+        return this;
+    }
+
+    setWithCredentials( value )
+    {
+        this.withCredentials = value;
+        return this;
+    }
+
+    setResourcePath( resourcePath )
+    {
+        this.resourcePath = resourcePath;
+        return this;
+    }
+
+    setRequestHeader( requestHeader )
+    {
+        this.requestHeader = requestHeader;
+        return this;
+    }
+
 }
 
 

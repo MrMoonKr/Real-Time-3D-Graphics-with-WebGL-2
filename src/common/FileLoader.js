@@ -23,9 +23,17 @@ import Cache from "./Cache";
  */
 const loading = {}
 
+/**
+ * fetch()를 이용한 비동기 리소스 요청시 발생한 에러 처리용
+ */
 class HttpError extends Error 
 {
 
+    /**
+     * 
+     * @param {string} message 
+     * @param {Response} response 
+     */
     constructor( message, response )
     {
         super( message ) ;
@@ -98,11 +106,11 @@ class FileLoader extends Loader
             onError: onError
         } ) ;
 
-        const req = new Request( url, {
+        const reqOption = {
             headers: new Headers( this.requestHeader ),
             credentials: this.withCredentials ? 'include' : 'same-origin' ,
-            //
-        } ) ;
+        } ;
+        const req = new Request( url, reqOption ) ;
 
         const mimeType = this.mimeType ;
         const responseType = this.responseType ;

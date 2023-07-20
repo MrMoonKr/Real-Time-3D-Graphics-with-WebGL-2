@@ -3,6 +3,7 @@
 import { mat4 } from 'gl-matrix';
 import utils from '../common/Utils.js' ;
 import FileLoader from '../common/FileLoader.js';
+import PLYLoader from '../common/PLYLoader.js';
 
 
 /**
@@ -56,6 +57,11 @@ let viewMatirx = mat4.create() ;
  */
 let projectionMatrix = mat4.create() ;
 
+let plyData ;
+let plyVAO ;
+let plyVBO ;
+let plyIBO ;
+
 let angle = 0 ;
 
 let vertCode = `#version 300 es
@@ -65,16 +71,21 @@ let vertCode = `#version 300 es
 
     in vec3         aVertexPosition ;
 
-    //uniform mat4    uModelViewMatrix ;
+    uniform mat4    uModelViewMatrix ;
     uniform mat4    uModelMatrix ;
     uniform mat4    uViewMatrix ;
     uniform mat4    uProjectionMatrix ;
 
+    out vec4        vWorldPosition ;
+
     void main(void) {
+
+        gl_PointSize = 3.0 ;
 
         //gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
         gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4( aVertexPosition, 1.0 );
         
+        vWorldPosition = normalize( uModelMatrix * vec4( aVertexPosition, 1.0 ) ) ;
     }
 `;
 
@@ -83,11 +94,18 @@ let fragCode = `#version 300 es
 
     precision mediump float ;
 
-    out vec4 fragColor ;
+    in vec4         vWorldPosition ;
+
+    out vec4        fragColor ;
 
     void main(void) {
 
-        fragColor = vec4( 0.5, 0.9, 0.2, 1.0 );
+        //fragColor = vec4( 0.5, 0.9, 0.2, 1.0 );
+        fragColor = vec4( vWorldPosition.xyz, 1.0 );
+
+        //vec4 colorA = vec4( 0.5, 0.0, 0.0, 1.0 );
+        //vec4 colorB = vec4( 0.0, 0.0, 0.7, 1.0 );
+        //fragColor = mix( colorA, colorB, vWorldPosition.y );
     }
 `;
 
@@ -219,7 +237,7 @@ function initBuffers() {
 // We call draw to render to our canvas
 function draw() {
 
-    angle += 2 ;
+    angle += 1 ;
  
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
     gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
@@ -240,8 +258,17 @@ function draw() {
     gl.uniformMatrix4fv( program.uModelViewMatrix, false, modelviewMatrix );
 
     gl.bindVertexArray( coneVAO ) ;
-
     gl.drawElements( gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0 );
+
+    if ( plyData !== undefined )
+    {
+        mat4.scale( modelMatrix, modelMatrix, [ 10, 10, 10 ] );
+        gl.uniformMatrix4fv( program.uModelMatrix, false, modelMatrix ) ;
+        gl.bindVertexArray( plyVAO ) ;
+        //gl.drawElements( gl.TRIANGLES, plyData.indices.length, gl.UNSIGNED_SHORT, 0 );
+        //gl.drawElements( gl.POINTS, plyData.indices.length, gl.UNSIGNED_SHORT, 0 );
+        gl.drawArrays( gl.POINTS, 0, plyData.vertices.length ) ;
+    }
 
     gl.bindVertexArray( null );
     gl.bindBuffer( gl.ARRAY_BUFFER, null );
@@ -250,10 +277,34 @@ function draw() {
     requestAnimationFrame( draw ); // 호출요청으로 반복호출 효과
 }
 
+/**
+ * 
+ * @param {import('../common/PLYLoader.js').PLYMesh} data 
+ */
 function onLoad( data )
 {
     console.log( '[파일로더] 성공' ) ;
     //console.log( data ) ;
+
+    plyVAO = gl.createVertexArray();
+    gl.bindVertexArray( plyVAO );
+
+    plyVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, plyVBO );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( data.vertices ), gl.STATIC_DRAW );
+    gl.enableVertexAttribArray( program.aVertexPosition );
+    gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
+
+    plyIBO = gl.createBuffer();
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, plyIBO );
+    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( data.indices ), gl.STATIC_DRAW );
+
+    gl.bindVertexArray( null );
+    gl.bindBuffer( gl.ARRAY_BUFFER, null );
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+
+    plyData = data ;
+    console.log( plyData ) ;
 }
 
 function onProgress( event )
@@ -263,15 +314,11 @@ function onProgress( event )
 
 function onError( error )
 {
-    console.log( '[파일로더] 에러발생' ) ;
+    console.log( '[파일로더] 에러발생 : ' + error ) ;
 }
 
-// Entry point to our application
-function init() {
-
-    //let loader = new FileLoader() ;
-    //loader.load( './ch02_01_square.html', onLoad, onProgress, onError );
-
+function testWorker()
+{
     let helloWorker = new Worker( '/src/workers/HelloWorker.js' ) ;
     helloWorker.onmessage = function ( e ) {
 
@@ -280,6 +327,19 @@ function init() {
         console.log( data ) ;
     }
     helloWorker.postMessage( '***워커에메시지***' ) ;
+}
+
+// Entry point to our application
+function init() {
+
+    // let loader = new FileLoader() ;
+    // loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
+    let loader = new PLYLoader() ;
+    //loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
+    //loader.load( '/assets/ply/flowers.ply', onLoad, onProgress, onError );
+    loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
+
+    //testWorker();
 
     canvas = utils.getCanvas( 'webgl-canvas' );
 
