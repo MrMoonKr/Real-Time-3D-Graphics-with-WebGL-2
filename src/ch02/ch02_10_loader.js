@@ -4,6 +4,7 @@ import { mat4 } from 'gl-matrix';
 import utils from '../common/Utils.js' ;
 import FileLoader from '../common/FileLoader.js';
 import PLYLoader from '../common/PLYLoader.js';
+import FBXLoader from '../common/FBXLoader.js';
 
 
 /**
@@ -284,27 +285,27 @@ function draw() {
 function onLoad( data )
 {
     console.log( '[파일로더] 성공' ) ;
-    //console.log( data ) ;
+    console.log( data ) ;
 
-    plyVAO = gl.createVertexArray();
-    gl.bindVertexArray( plyVAO );
+    // plyVAO = gl.createVertexArray();
+    // gl.bindVertexArray( plyVAO );
 
-    plyVBO = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, plyVBO );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( data.vertices ), gl.STATIC_DRAW );
-    gl.enableVertexAttribArray( program.aVertexPosition );
-    gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
+    // plyVBO = gl.createBuffer();
+    // gl.bindBuffer( gl.ARRAY_BUFFER, plyVBO );
+    // gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( data.vertices ), gl.STATIC_DRAW );
+    // gl.enableVertexAttribArray( program.aVertexPosition );
+    // gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
 
-    plyIBO = gl.createBuffer();
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, plyIBO );
-    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( data.indices ), gl.STATIC_DRAW );
+    // plyIBO = gl.createBuffer();
+    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, plyIBO );
+    // gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( data.indices ), gl.STATIC_DRAW );
 
-    gl.bindVertexArray( null );
-    gl.bindBuffer( gl.ARRAY_BUFFER, null );
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+    // gl.bindVertexArray( null );
+    // gl.bindBuffer( gl.ARRAY_BUFFER, null );
+    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 
-    plyData = data ;
-    console.log( plyData ) ;
+    // plyData = data ;
+    // console.log( plyData ) ;
 }
 
 function onProgress( event )
@@ -334,11 +335,15 @@ function init() {
 
     // let loader = new FileLoader() ;
     // loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
-    let loader = new PLYLoader() ;
+    //let loader = new PLYLoader() ;
     //loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/flowers.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
-    loader.load( '/assets/ply/untitled.ply', onLoad, onProgress, onError );
+    //loader.load( '/assets/ply/untitled.ply', onLoad, onProgress, onError );
+
+    let loader1 = new FBXLoader();
+    //loader1.load( '/assets/fbx/chair_01.fbx', onLoad, onProgress, onError ) ;
+    loader1.load( '/assets/fbx/m_set_00.FBX', onLoad, onProgress, onError ) ;
 
     //testWorker();
 
