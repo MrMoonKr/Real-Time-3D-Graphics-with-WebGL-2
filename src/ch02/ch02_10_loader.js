@@ -262,7 +262,7 @@ function draw() {
 
     if ( plyData !== undefined )
     {
-        mat4.scale( modelMatrix, modelMatrix, [ 10, 10, 10 ] );
+        mat4.scale( modelMatrix, modelMatrix, [ 1, 1, 1 ] );
         gl.uniformMatrix4fv( program.uModelMatrix, false, modelMatrix ) ;
         gl.bindVertexArray( plyVAO ) ;
         //gl.drawElements( gl.TRIANGLES, plyData.indices.length, gl.UNSIGNED_SHORT, 0 );
@@ -337,7 +337,8 @@ function init() {
     let loader = new PLYLoader() ;
     //loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/flowers.ply', onLoad, onProgress, onError );
-    loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
+    //loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
+    loader.load( '/assets/ply/untitled.ply', onLoad, onProgress, onError );
 
     //testWorker();
 
