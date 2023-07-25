@@ -5,6 +5,7 @@ import utils from '../common/Utils.js' ;
 import FileLoader from '../common/FileLoader.js';
 import PLYLoader from '../common/PLYLoader.js';
 import FBXLoader from '../common/FBXLoader.js';
+import OBJLoader from '../common/OBJLoader.js';
 
 
 /**
@@ -285,7 +286,7 @@ function draw() {
 function onLoad( data )
 {
     console.log( '[파일로더] 성공' ) ;
-    console.log( data ) ;
+    //console.log( data ) ;
 
     // plyVAO = gl.createVertexArray();
     // gl.bindVertexArray( plyVAO );
@@ -304,8 +305,8 @@ function onLoad( data )
     // gl.bindBuffer( gl.ARRAY_BUFFER, null );
     // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 
-    // plyData = data ;
-    // console.log( plyData ) ;
+    //plyData = data ;
+    console.log( plyData ) ;
 }
 
 function onProgress( event )
@@ -340,10 +341,13 @@ function init() {
     //loader.load( '/assets/ply/flowers.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/untitled.ply', onLoad, onProgress, onError );
+    //loader.load( '/assets/ply/academy.ply', onLoad, onProgress, onError );
+    let loader = new OBJLoader();
+    loader.load( '/assets/obj/Jaaninoja_Bridge_decimated_SF.obj', onLoad, onProgress, onError );
 
-    let loader1 = new FBXLoader();
-    //loader1.load( '/assets/fbx/chair_01.fbx', onLoad, onProgress, onError ) ;
-    loader1.load( '/assets/fbx/m_set_00.FBX', onLoad, onProgress, onError ) ;
+    // let loader1 = new FBXLoader();
+    // //loader1.load( '/assets/fbx/chair_01.fbx', onLoad, onProgress, onError ) ;
+    // loader1.load( '/assets/fbx/m_set_00.FBX', onLoad, onProgress, onError ) ;
 
     //testWorker();
 
