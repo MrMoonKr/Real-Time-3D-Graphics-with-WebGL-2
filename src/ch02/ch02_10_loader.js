@@ -288,24 +288,24 @@ function onLoad( data )
     console.log( '[파일로더] 성공' ) ;
     //console.log( data ) ;
 
-    // plyVAO = gl.createVertexArray();
-    // gl.bindVertexArray( plyVAO );
+    plyVAO = gl.createVertexArray();
+    gl.bindVertexArray( plyVAO );
 
-    // plyVBO = gl.createBuffer();
-    // gl.bindBuffer( gl.ARRAY_BUFFER, plyVBO );
-    // gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( data.vertices ), gl.STATIC_DRAW );
-    // gl.enableVertexAttribArray( program.aVertexPosition );
-    // gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
+    plyVBO = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, plyVBO );
+    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( data.vertices ), gl.STATIC_DRAW );
+    gl.enableVertexAttribArray( program.aVertexPosition );
+    gl.vertexAttribPointer( program.aVertexPosition, 3, gl.FLOAT, false, 0, 0 );
 
-    // plyIBO = gl.createBuffer();
-    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, plyIBO );
-    // gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( data.indices ), gl.STATIC_DRAW );
+    plyIBO = gl.createBuffer();
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, plyIBO );
+    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( data.indices ), gl.STATIC_DRAW );
 
-    // gl.bindVertexArray( null );
-    // gl.bindBuffer( gl.ARRAY_BUFFER, null );
-    // gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
+    gl.bindVertexArray( null );
+    gl.bindBuffer( gl.ARRAY_BUFFER, null );
+    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, null );
 
-    //plyData = data ;
+    plyData = data ;
     console.log( plyData ) ;
 }
 
@@ -334,16 +334,17 @@ function testWorker()
 // Entry point to our application
 function init() {
 
-    // let loader = new FileLoader() ;
+    //let loader = new FileLoader() ;
     // loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
-    //let loader = new PLYLoader() ;
+    let loader = new PLYLoader() ;
     //loader.load( '/assets/ply/bunny.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/flowers.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/Carola_PointCloud.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/untitled.ply', onLoad, onProgress, onError );
     //loader.load( '/assets/ply/academy.ply', onLoad, onProgress, onError );
-    let loader = new OBJLoader();
-    loader.load( '/assets/obj/Jaaninoja_Bridge_decimated_SF.obj', onLoad, onProgress, onError );
+    loader.load( '/assets/ply/sample.ply', onLoad, onProgress, onError );
+    // let loader = new OBJLoader();
+    // loader.load( '/assets/obj/Jaaninoja_Bridge_decimated_SF.obj', onLoad, onProgress, onError );
 
     // let loader1 = new FBXLoader();
     // //loader1.load( '/assets/fbx/chair_01.fbx', onLoad, onProgress, onError ) ;

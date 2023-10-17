@@ -106,6 +106,8 @@ class PLYLoader extends Loader
         const loader = new FileLoader( this.manager ) ;
         loader.setPath( this.path );
         loader.setResponseType( 'arraybuffer' );
+        //loader.setResponseType( 'arraybuffer' );
+        loader.setMimeType( undefined ) ;
         loader.setRequestHeader( this.requestHeader );
         loader.setWithCredentials( this.withCredentials );
         loader.load( url, function ( text ) {
@@ -795,7 +797,8 @@ class PLYLoader extends Loader
 
             if ( header.format === 'ascii' ) 
             {
-                const text = new TextDecoder().decode( bytes );
+                //const text = new TextDecoder().decode( bytes );
+                const text = new TextDecoder().decode( bytes.subarray( 0, 300 * 1024 * 1024 ) );
 
                 geometry = parseASCII( text, header );
             }

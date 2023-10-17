@@ -113,8 +113,8 @@ module.exports = async () => {
 /**
  * 챕터 목록으로 부터 webpack용 entry 객체 및 html plugin 목록 생성
  * @param {string} parentPath 상위 부모 디렉토리명
- * @param {Array<string>} chapters 챕터 디렉토리명 목록
- * @returns {string} template 템플릿 html 페이지 경로 ex) './src/template.html'
+ * @param {Array<string>} chapters 챕터 디렉토리명 목록 ex) [ 'ch01', 'ch02', 'ch03', ] 
+ * @param {string} template 템플릿 html 페이지 경로 ex) './src/template.html'
  */
 const getDirectoryEntries = async ( parentPath, chapters, template='./src/template.html' ) => {
 
@@ -134,10 +134,10 @@ const getDirectoryEntries = async ( parentPath, chapters, template='./src/templa
 
         for ( const candiate of candidates ) {
 
-            const name = path.parse( candiate.name ).name ;
+            const name   = path.parse( candiate.name ).name ;
             const plugin = new HtmlWebpackPlugin( {
                 //filename: chapter + '/' + name + '.html' ,
-                filename: path.join( chapter, name+'.html' ),
+                filename: path.join( chapter, name + '.html' ),
                 chunks: [name] ,
                 template: template
             } ) ;
