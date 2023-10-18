@@ -13,64 +13,13 @@ import frag from '../shaders/ch03/ch03_02.frag';
 let canvas;
 
 /** 
- * @type { App } 로직 진행
+ * @type { App } 앱 객체
  */
 let app = null ;
 
 /**
- * @type { string } 정점셰이더
+ * 애플리케이션 
  */
-const vertCode = 
-`#version 300 es
-#pragma vscode_glsllint_stage: vert
-
-precision mediump float;
-
-uniform mat4    uModelViewMatrix;
-uniform mat4    uProjectionMatrix;
-uniform mat4    uNormalMatrix;
-uniform vec3    uLightDirection;
-uniform vec3    uLightDiffuse;
-uniform vec3    uMaterialDiffuse;
-
-in vec3         aVertexPosition;
-in vec3         aVertexNormal;
-
-out vec4        vVertexColor;
-
-void main( void ) 
-{
-    vec3 N      = normalize( vec3( uNormalMatrix * vec4( aVertexNormal, 1.0 ) ) ) ;
-
-    vec3 light  = vec3( uModelViewMatrix * vec4( uLightDirection, 0.0 ) );
-    vec3 L      = normalize( light ) ;
-
-    float lambert = dot( N, -L ) ;
-
-    vec3 Id     = uMaterialDiffuse * uLightDiffuse * lambert ;
-
-    vVertexColor = vec4( Id, 1.0 );
-
-    gl_Position = uProjectionMatrix * uModelViewMatrix * vec4( aVertexPosition, 1.0 );
-
-}`;
-
-const fragCode =
-`#version 300 es
-#pragma vscode_glsllint_stage: frag
-
-precision mediump float;
-
-in vec4     vVertexColor;
-
-out vec4    fragColor;
-
-void main( void )
-{
-    fragColor = vVertexColor;
-}`;
-
-
 class App 
 {
 
@@ -125,19 +74,27 @@ class App
         this.sphereColor = [ 0.5, 0.8, 0.1 ];
 
         /**
-         * @type { glm.mat4 } 카메라 월드행렬
+         * @type { glm.mat4 } 모델행렬, 모델의 월드행렬
+         */
+        this.modelMatrix        = glm.mat4.create();
+        /**
+         * @type { glm.mat4 } 카메라행렬, 카메라의 월드행렬
          */
         this.cameraMatrix       = glm.mat4.create();
         /**
-         * @type { glm.mat4 } 카메라의 뷰행렬 * 오브젝트 월드행렬
+         * @type { glm.mat4 } 뷰행렬, 카메라행렬의 역행렬
+         */
+        this.viewMatrix         = glm.mat4.create();
+        /**
+         * @type { glm.mat4 } 모델뷰행렬, 뷰행렬 * 모델행렬
          */
         this.modelViewMatrix    = glm.mat4.create();
         /**
-         * @type { glm.mat4 } 카메라의 투영행렬
+         * @type { glm.mat4 } 투영행렬, 카메라의 원근투영행렬
          */
         this.projectionMatrix   = glm.mat4.create();
         /**
-         * @type { glm.mat4 } 노멀행렬
+         * @type { glm.mat4 } 노멀행렬, 모델뷰행렬의 역행렬의 전치행렬
          */
         this.normalMatrix       = glm.mat4.create();
 
@@ -170,46 +127,67 @@ class App
         const gl    = this.gl ;
         const mat4  = glm.mat4 ;
 
-        // Clear the scene
+        // 뷰포트 설정
         gl.viewport( 0, 0, gl.canvas.width, gl.canvas.height );
+
+        // 화면 클리어, 색상버퍼와 깊이버퍼 지우기
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
-        // Camera
+        // 뷰행렬
+        mat4.identity( this.cameraMatrix );
+        mat4.translate( this.cameraMatrix, this.cameraMatrix, [0,0,5] );
+        mat4.invert( this.viewMatrix, this.cameraMatrix );
+
+        // 투영행렬 설정
         mat4.perspective( this.projectionMatrix, 45 * ( Math.PI / 180 ), gl.canvas.width / gl.canvas.height, 0.1, 10000 );
 
         /**
-         * @type { glm.mat4 }
+         * @type { glm.mat4 } 모델행렬 임시
          */
         let worldTM = glm.mat4.create() ;
 
         mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ 2.0, 0.0, -5.0 ] );
+        mat4.translate( worldTM, worldTM, [ 2.0, 0.0, 0.0 ] ); // 오른쪽
 
         this.draw_object( worldTM );
 
         mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ 0.0, 0.0, -5.0 ] );
+        mat4.translate( worldTM, worldTM, [ 0.0, 0.0, -5.0 ] ); // 중앙
 
         this.draw_object( worldTM );
 
-
         mat4.identity( worldTM );
-        mat4.translate( worldTM, worldTM,[ -2.0, 0.0, -5.0 ] );
+        mat4.translate( worldTM, worldTM,[ -2.0, 0.0, -5.0 ] ); // 왼쪽
 
         this.draw_object( worldTM );
 
     }
 
     /**
-     * 
-     * @param { glm.mat4 } modelViewMatrix 
+     * 월드변환을 이용하여 객체 배치 후 렌더링
+     * @param { glm.mat4 } worldMatrix 모델 변환 행렬, 즉 모델의 월드 행렬
      */
-    draw_object( modelViewMatrix )
+    draw_object( worldMatrix )
     {
         const gl    = this.gl ;
         const mat4  = glm.mat4 ;
 
-        mat4.copy( this.modelViewMatrix, modelViewMatrix );
+        //mat4.mul( this.modelViewMatrix, this.viewMatrix, worldMatrix ) ;
+        //mat4.mul( this.modelViewMatrix, worldMatrix, this.viewMatrix ) ;
+
+        const viewTM = mat4.create() ;
+        mat4.translate( viewTM, viewTM, [0,0,-4] );
+
+        const cameraTM = mat4.create() ;
+        mat4.translate( cameraTM, cameraTM, [0,0,4] );
+        mat4.invert( cameraTM, cameraTM );
+
+        // mat4.identity( this.cameraMatrix );
+        // mat4.translate( this.cameraMatrix, this.cameraMatrix, [0,0,5] );
+        // //mat4.invert( this.cameraMatrix, this.cameraMatrix );
+        // mat4.invert( this.viewMatrix, this.cameraMatrix );
+
+        mat4.mul( this.modelViewMatrix, this.viewMatrix, worldMatrix );
 
         mat4.copy( this.normalMatrix, this.modelViewMatrix );
         mat4.invert( this.normalMatrix, this.normalMatrix );

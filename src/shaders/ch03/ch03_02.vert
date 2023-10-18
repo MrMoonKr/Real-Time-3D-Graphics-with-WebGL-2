@@ -3,15 +3,19 @@
 
 precision mediump float;
 
-uniform mat4    uModelViewMatrix;
-uniform mat4    uProjectionMatrix;
-uniform mat4    uNormalMatrix;
-uniform vec3    uLightDirection;
-uniform vec3    uLightDiffuse;
-uniform vec3    uMaterialDiffuse;
+uniform mat4    uModelMatrix ;
+uniform mat4    uCameraMatrix ;
+uniform mat4    uViewMatrix ;
+uniform mat4    uProjectionMatrix ;
+uniform mat4    uModelViewMatrix ;
+uniform mat4    uNormalMatrix ;
 
-in vec3         aVertexPosition;
-in vec3         aVertexNormal;
+uniform vec3    uMaterialDiffuse ;
+uniform vec3    uLightDirection ;
+uniform vec3    uLightDiffuse ;
+
+in vec3         aVertexPosition ;
+in vec3         aVertexNormal ;
 
 out vec4        vVertexColor;
 
