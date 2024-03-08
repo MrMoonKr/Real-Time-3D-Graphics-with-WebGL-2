@@ -172,7 +172,7 @@ class OrbitController
         this.domElement.onpointerdown = event => this.onPointerDown( event ) ;
         //
 
-        //scope.domElement.addEventListener( 'contextmenu', this.onContextMenu ) ;
+        this.domElement.addEventListener( 'contextmenu', this.onContextMenu ) ;
 
         //scope.domElement.addEventListener( 'pointerdown', this.onPointerDown ) ;
         //scope.domElement.addEventListener( 'wheel', this.onMouseWheel, { passive: false } ) ;
@@ -500,6 +500,8 @@ class OrbitController
     handleMouseUp( event )
     {
         console.log( 'handleMouseUp() : ' + event.type ) ;
+
+        event.preventDefault();
     }
 
 
@@ -794,6 +796,8 @@ class OrbitController
      */
     onPointerUp( event )
     {
+        event.preventDefault() ;
+
         switch ( event.pointerType )
         {
             case 'mouse':
@@ -945,6 +949,8 @@ class OrbitController
      */
     onMouseUp( event )
     {
+        event.preventDefault() ;
+
         this.domElement.ownerDocument.onpointermove = event => { } ;
         this.domElement.ownerDocument.onpointerup   = event => { } ;
         //this.domElement.ownerDocument.removeEventListener( 'pointermove', this.onPointerMove ) ;
@@ -1138,7 +1144,7 @@ class OrbitController
     }
 
     /**
-     * 
+     * 컨텍스트 메뉴 처리 : 현재는 단순 메뉴 팝업 중지 처리...
      * @param {MouseEvent} event 
      * @returns 
      */

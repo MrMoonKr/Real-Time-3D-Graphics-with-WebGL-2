@@ -2,7 +2,9 @@ const path  = require( 'path' ) ;
 const fs    = require( 'fs' ).promises ;
 
 const { SourceMapDevToolPlugin } = require( 'webpack' ) ;
+const { CleanWebpackPlugin } = require( 'clean-webpack-plugin' ) ;
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' ) ;
+const CopyPlugin = require( 'copy-webpack-plugin' ) ;
 
 
 const CHAPTER_PARENT = path.join( __dirname, 'src/' ) ;
@@ -41,14 +43,20 @@ module.exports = async () => {
         },
 
         output: {
-            //path: __dirname + '/dist',
-            path: __dirname + '/public',
+            path: __dirname + '/dist',
+            //path: __dirname + '/public',
             
-            //filename: 'js/[name].bundle.js'
+            //filename: 'js/[name].[contenthash:8].js'
             filename: function ( pathData, assetInfo )
             {
                 // console.log( pathData ); // https://webpack.js.org/configuration/output/#outputfilename
                 // console.log( assetInfo );  // all just {}
+
+                // console.log( 'pathData : ' );
+                // console.log( pathData ) ;
+                // console.log( 'assetInfo : ' );
+                // console.log( assetInfo ) ;
+
                 const parent   = pathData.chunk.name.substr( 0,  4 ) ;
                 const name     = pathData.chunk.name ;
                 const ext      = '.bundle.js';
@@ -58,8 +66,8 @@ module.exports = async () => {
             } 
         },
 
-        //devtool: 'source-map',
-        devtool: 'inline-cheap-module-source-map',
+        devtool: 'source-map',
+        //devtool: 'inline-cheap-module-source-map',
 
         plugins: [
             // https://webpack.js.org/plugins/source-map-dev-tool-plugin
@@ -83,6 +91,21 @@ module.exports = async () => {
         module: {
             rules: [
                 {
+                    test: /\.js$/,
+                    exclude: /node_modules/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [ '@babel/preset-env', '@babel/preset-react' ]
+                        }
+                    }
+                },
+                {
+                    test: /\.(glsl|vert|frag|vs|fs)$/,
+                    exclude: /node_modules/,
+                    loader: 'webpack-glsl-loader'
+                },
+                {
                     test: /\.ts$/,
                     exclude: /node_modules/,
                     loader: 'ts-loader',
@@ -92,20 +115,25 @@ module.exports = async () => {
                             declaration: false
                         }
                     }
-                },
-                {
-                    test: /\.(glsl|vert|frag|vs|fs)$/,
-                    exclude: /node_modules/,
-                    loader: 'webpack-glsl-loader'
                 }
             ]
         },
 
         resolve: {
             extensions: [ '.js', '.ts' ]
-        }
+        },
 
-        //watch: true
+        devServer: {
+
+            hot: true,
+
+            port: 5507,
+
+            //contentBase: path.join( __dirname, 'dist' ), <- deprecated to static
+            static: {
+                directory: path.join( __dirname, 'dist' )
+            }
+        }
     }
 }
 
