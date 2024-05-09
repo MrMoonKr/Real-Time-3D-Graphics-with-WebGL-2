@@ -12,7 +12,7 @@ class ProgramShader
      * 
      * @param {WebGL2RenderingContext} gl 
      * @param {string} shaderCode 
-     * @param {number} shaderType 
+     * @param {number} shaderType gl.VERTEX_SHADER | gl.FRAGMENT_SHADER
      * @returns {WebGLShader}
      */
     static compileShader( gl, shaderCode, shaderType ) 

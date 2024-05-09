@@ -5,9 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Webpack",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/webpack/bin/webpack.js",
+            "args": ["--config", "${workspaceFolder}/webpack.config.js"],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+        },
+        {
+            "name": "Launch Chrome",
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
             "url": "http://localhost:5507",
             "webRoot": "${workspaceFolder}"
         }

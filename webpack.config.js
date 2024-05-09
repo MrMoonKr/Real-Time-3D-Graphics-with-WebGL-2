@@ -7,7 +7,7 @@ const HtmlWebpackPlugin = require( 'html-webpack-plugin' ) ;
 const CopyPlugin = require( 'copy-webpack-plugin' ) ;
 
 
-const CHAPTER_PARENT = path.join( __dirname, 'src/' ) ;
+const CHAPTER_PARENT = path.join( __dirname, 'src' ) ;
 const CHAPTER_LIST = [
     'ch01' ,
     'ch02' ,
@@ -149,32 +149,39 @@ const getDirectoryEntries = async ( parentPath, chapters, template='./src/templa
     const generatedPlugins = [] ;
     const generatedEntries = {} ;
 
-    for ( const chapter of chapters )
-    {
-        const entries = await fs.readdir( parentPath + chapter, {
+    for ( const chapter of chapters ) {
+        
+        // 하부디렉토리 및 파일 모두 받는다
+        const entries = await fs.readdir( path.join( parentPath, chapter ), {
             withFileTypes: true,
             recursive: false
         } ) ;
 
+        // js 파일만 추린다
         const candidates = entries.filter( ( entry ) => {
             return entry.name.endsWith( '.js' ) ;
         } ) ;
 
+        // js 이름과 같은 html 문서를 생성하고 같은 이름의 chunk를 임베딩
         for ( const candiate of candidates ) {
 
-            const name   = path.parse( candiate.name ).name ;
+            const name = path.parse( candiate.name ).name ;
+
+            // entry 객체 구성
+
+            generatedEntries[ name ] = {
+                import: path.join( parentPath, chapter, candiate.name )
+            }
+
+            // html plugin 구성
+
             const plugin = new HtmlWebpackPlugin( {
                 //filename: chapter + '/' + name + '.html' ,
                 filename: path.join( chapter, name + '.html' ),
                 chunks: [name] ,
                 template: template
             } ) ;
-
-            generatedEntries[ name ] = {
-                //import: parentPath + chapter + '/' + candiate.name 
-                import: path.join( parentPath, chapter, candiate.name )
-            }
-
+            
             generatedPlugins.push( plugin ) ;
 
         }

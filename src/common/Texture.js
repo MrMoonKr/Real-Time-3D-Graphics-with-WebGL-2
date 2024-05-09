@@ -3,6 +3,11 @@
 // Encapsulates creating of WebGL textures
 class Texture {
 
+    /**
+     * 
+     * @param {WebGL2RenderingContext} gl 
+     * @param {string} source 
+     */
     constructor( gl, source ) {
         this.gl = gl;
         this.glTexture = gl.createTexture();
@@ -16,11 +21,18 @@ class Texture {
     }
 
     // Sets the texture image source
+    /**
+     * 
+     * @param {string} source 
+     */
     setImage( source ) {
         this.image.src = source;
     }
 
     // Configure texture
+    /**
+     * 
+     */
     handleLoadedTexture()
     {
         const { gl, image, glTexture } = this;

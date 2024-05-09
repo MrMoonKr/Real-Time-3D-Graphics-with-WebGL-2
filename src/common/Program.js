@@ -62,6 +62,10 @@ class Program {
     }
 
     // Set references to attributes onto the program instance
+    /**
+     * 
+     * @param {string[]} attributes 
+     */
     setAttributeLocations( attributes ) 
     {
         attributes.forEach( attribute => {
@@ -70,6 +74,10 @@ class Program {
     }
 
     // Set references to uniforms onto the program instance
+    /**
+     * 
+     * @param {string[]} uniforms 
+     */
     setUniformLocations( uniforms ) 
     {
         uniforms.forEach( uniform => {

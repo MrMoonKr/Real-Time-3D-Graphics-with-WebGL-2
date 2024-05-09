@@ -29,6 +29,18 @@ const utils = {
      */
     getGLContext( canvas )
     {
+        // api sample code
+        
+        // let ctxAttr = new WebGLContextAttributes();
+        // ctxAttr.alpha = true;
+        // ctxAttr.depth = true;
+        // ctxAttr.stencil = true;
+        // ctxAttr.antialias = true;
+        // ctxAttr.powerPreference = 'high-performance';
+        // ctxAttr.failIfMajorPerformanceCaveat = true;
+
+        // let gl = canvas.getContext('webgl2', ctxAttr);
+
         return canvas.getContext('webgl2') || console.error('WebGL2 is not available in your browser.');
     },
   
