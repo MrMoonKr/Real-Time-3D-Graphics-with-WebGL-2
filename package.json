@@ -14,6 +14,7 @@
     "fflate": "^0.8.0",
     "gl-matrix": "^3.4.3",
     "mjolnir.js": "^2.7.1",
+    "spectorjs": "^0.9.30",
     "three": "^0.145.0"
   },
   "devDependencies": {

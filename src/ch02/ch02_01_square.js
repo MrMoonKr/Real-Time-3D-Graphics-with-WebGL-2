@@ -2,6 +2,7 @@
 
 import utils from '../common/Utils.js' ;
 
+import * as SPECTOR from 'spectorjs';
 
 /**
  * @type {HTMLCanvasElement} 캔버스 요소
@@ -181,6 +182,9 @@ function init() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight * 0.9;
+
+    const spector = new SPECTOR.Spector();
+    spector.displayUI();
 
     gl = utils.getGLContext( canvas );
     gl.clearColor( 0.3, 0.3, 0.3, 1 );
